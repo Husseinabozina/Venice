@@ -10,7 +10,7 @@ function card(p, canMove) {
     <div class="t">${esc(p.name)}</div>
     <div class="s">${esc(find.customer(p.customerId)?.name)} · ${esc(find.customer(p.customerId)?.city)}</div>
     <div class="row"><span class="chip ${late ? 'bad' : 'neutral'}">${icon('clock', 12)} ${dayCount(days)}</span>${p.stage < DONE ? `<span class="chip neutral">${icon('truck', 12)} ${relDays(p.expected)}</span>` : ''}</div>
-    ${canMove && p.stage < DONE ? `<div class="kfoot" data-nohref><button class="kmove" draggable="false" data-act="kNext" data-id="${p.id}" aria-label="نقل إلى المرحلة التالية" data-tour="knext-${p.id}">${p.stage === DONE - 1 ? 'تسليم' : 'المرحلة التالية'} ${icon('next', 15)}</button></div>` : ''}</div>`;
+    ${canMove ? `<div class="kfoot" data-nohref>${p.stage > 0 ? `<button class="kback" draggable="false" data-act="kBack" data-id="${p.id}" title="المرحلة السابقة" aria-label="إرجاع إلى المرحلة السابقة">${icon('next', 15)}</button>` : ''}${p.stage < DONE ? `<button class="kmove" draggable="false" data-act="kNext" data-id="${p.id}" aria-label="نقل إلى المرحلة التالية" data-tour="knext-${p.id}">${p.stage === DONE - 1 ? 'تسليم' : 'المرحلة التالية'} ${icon('next', 15)}</button>` : ''}</div>` : ''}</div>`;
 }
 
 export default {
@@ -41,5 +41,6 @@ export default {
 };
 
 export const handlers = {
+  kBack(el) { const p = act.moveStage(el.dataset.id, -1); toast(`أُعيد ${p.name} إلى ${STAGES[p.stage].name}`, 'gold'); nav.render(); },
   kNext(el) { const p = act.moveStage(el.dataset.id, 1); toast(p.stage >= DONE ? `تم تسليم ${p.name}` : `${p.name} ← ${STAGES[p.stage].name}`); nav.render(); },
 };
