@@ -235,7 +235,12 @@ tfoot td { font-weight: 600; background: #fbfaf6; }
 .kitem .t { font-weight: 600; font-size: 15.5px; }
 .kitem .s { font-size: 13.5px; color: var(--muted); }
 .kitem .row { gap: 6px; }
-.kitem .mv { margin-inline-start: auto; }
+.kitem .kfoot { border-top: 1px solid var(--line); margin: 4px -12px -12px; padding: 8px 12px; cursor: default; display: flex; justify-content: flex-end; }
+.kmove { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 8px; border: 1px solid #e2cf9f; background: #f7efdc; color: #7a5a1e; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.kmove .ic { color: #9a7428; transition: transform .15s; }
+.kmove:hover { background: var(--gold); border-color: var(--gold); color: #fff; }
+.kmove:hover .ic { color: #fff; transform: translateX(-2px); }
+.kmove:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* misc */
 .empty { text-align: center; padding: 36px 18px; color: var(--muted); display: grid; justify-items: center; gap: 6px; }

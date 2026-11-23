@@ -159,7 +159,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   const row = e.target.closest('[data-href]');
-  if (row && !e.target.closest('a,button,input,select,label')) { go(row.dataset.href); return; }
+  if (row && !e.target.closest('a,button,input,select,label,[data-nohref]')) { go(row.dataset.href); return; }
   if (sideOpen && e.target.closest('.nav a')) { sideOpen = false; }
   if (!e.target.closest('.search')) document.querySelector('.search-results')?.setAttribute('hidden', '');
 });

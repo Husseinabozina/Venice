@@ -9,8 +9,8 @@ function card(p, canMove) {
   return `<div class="kitem ${late ? 'late' : ''}" draggable="${canMove}" data-pid="${p.id}" data-href="projects/${p.id}" data-tour="card-${p.id}">
     <div class="t">${esc(p.name)}</div>
     <div class="s">${esc(find.customer(p.customerId)?.name)} · ${esc(find.customer(p.customerId)?.city)}</div>
-    <div class="row"><span class="chip ${late ? 'bad' : 'neutral'}">${icon('clock', 12)} ${dayCount(days)}</span>${p.stage < DONE ? `<span class="chip neutral">${icon('truck', 12)} ${relDays(p.expected)}</span>` : ''}
-    ${canMove && p.stage < DONE ? `<button class="btn sm mv" data-act="kNext" data-id="${p.id}" title="المرحلة التالية" aria-label="نقل إلى المرحلة التالية" data-tour="knext-${p.id}">${icon('next', 14)}</button>` : ''}</div></div>`;
+    <div class="row"><span class="chip ${late ? 'bad' : 'neutral'}">${icon('clock', 12)} ${dayCount(days)}</span>${p.stage < DONE ? `<span class="chip neutral">${icon('truck', 12)} ${relDays(p.expected)}</span>` : ''}</div>
+    ${canMove && p.stage < DONE ? `<div class="kfoot" data-nohref><button class="kmove" draggable="false" data-act="kNext" data-id="${p.id}" aria-label="نقل إلى المرحلة التالية" data-tour="knext-${p.id}">${p.stage === DONE - 1 ? 'تسليم' : 'المرحلة التالية'} ${icon('next', 15)}</button></div>` : ''}</div>`;
 }
 
 export default {
@@ -29,8 +29,9 @@ export default {
   },
   mount(root) {
     const k = root.querySelector('#kanban'); if (!k) return;
-    let dragId = null;
-    k.addEventListener('dragstart', (e) => { const it = e.target.closest('.kitem'); if (!it) return; dragId = it.dataset.pid; it.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); });
+    let dragId = null; let fromBtn = false;
+    k.addEventListener('pointerdown', (e) => { fromBtn = !!e.target.closest('.kfoot'); });
+    k.addEventListener('dragstart', (e) => { if (fromBtn) { e.preventDefault(); return; } const it = e.target.closest('.kitem'); if (!it) return; dragId = it.dataset.pid; it.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', dragId); });
     k.addEventListener('dragend', (e) => { e.target.closest('.kitem')?.classList.remove('dragging'); k.querySelectorAll('.over').forEach((x) => x.classList.remove('over')); });
     k.addEventListener('dragover', (e) => { const col = e.target.closest('.kcol'); if (!col) return; e.preventDefault(); k.querySelectorAll('.over').forEach((x) => x !== col && x.classList.remove('over')); col.classList.add('over'); });
     k.addEventListener('drop', (e) => { const col = e.target.closest('.kcol'); if (!col || !dragId) return; e.preventDefault();
