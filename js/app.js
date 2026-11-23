@@ -1,4 +1,4 @@
-import { store, ROLES, NAV, find, lowStock, isLate, balanceOf, quoteTotal, nextDue, today } from './data.js';
+import { store, ROLES, NAV, DEMO, find, lowStock, isLate, balanceOf, quoteTotal, nextDue, today } from './data.js';
 import { icon } from './icons.js';
 import { esc, toast, closeModal } from './ui.js';
 import { pages, handlers } from './pages/index.js';
@@ -17,35 +17,33 @@ function route() {
 }
 
 // ---------- login ----------
+function rolePickerView() {
+  // Kept for later: one-click login per role + guided tour (switched off via DEMO.rolePicker / DEMO.tour).
+  return `${DEMO.tour ? `<button class="tour-cta" data-act="startTour"><span class="play">${icon('play', 20)}</span><span><b>جولة الدورة الكاملة</b><span>${TOUR_STEPS} خطوة</span></span></button>` : ''}
+      <div class="role-grid">
+        ${ROLES.map((r, i) => `<button class="role-card ${i === 0 ? 'featured' : ''}" data-act="login" data-role="${r.key}">
+          <div class="who"><span class="avatar">${esc(r.person.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><b>${esc(r.name)}</b><span style="display:block">${esc(r.person)}</span></div></div>
+          <span>${esc(r.desc)}</span></button>`).join('')}
+      </div>`;
+}
 function loginView() {
   return `<div class="login">
     <section class="login-brand">
       <div class="row"><div class="mark">V</div><div><div class="brand-name">VENICE ERP</div><div class="brand-tag">KITCHENS · FURNITURE · INTERIORS</div></div></div>
       <div>
-        <h1>كل شغل المصنع في <em>مكان واحد</em>، من أول مكالمة لحد آخر دفعة.</h1>
-        <p>نموذج تفاعلي لنظام فينيسيا: العملاء، والعروض والفواتير، والمشاريع، والورشة، والمخازن، والمشتريات، وتكلفة كل مطبخ، مربوطين ببعض.</p>
-        <div class="login-points">
-          <div>${icon('check')}عرض السعر يتحول لفاتورة ومشروع بضغطة</div>
-          <div>${icon('check')}متابعة كل مطبخ في الورشة لحظة بلحظة</div>
-          <div>${icon('check')}ربح كل مشروع محسوب من الصرف الفعلي</div>
-          <div>${icon('check')}كل موظف يشوف اللي يخصه بس</div>
-        </div>
+        <h1>نظام إدارة <em>المصنع</em></h1>
+        <p>المبيعات، والمشاريع، والإنتاج، في نظام واحد.</p>
       </div>
       <div class="small" style="color:#8f887b">VENICE FURNITURE WORKSHOP W.L.L · مملكة البحرين</div>
     </section>
     <section class="login-side">
-      <div><h2>أهلًا بيك</h2><p class="muted" style="margin:4px 0 0">اختار دورك وادخل على طول، من غير ما تكتب أي بيانات.</p></div>
-      <button class="tour-cta" data-act="startTour"><span class="play">${icon('play', 20)}</span><span><b>ابدأ جولة الدورة الكاملة</b><span>${TOUR_STEPS} خطوة: من عميل جديد لحد ما المطبخ يتسلم ويطلع ربحه</span></span></button>
-      <div class="role-grid">
-        ${ROLES.map((r, i) => `<button class="role-card ${i === 0 ? 'featured' : ''}" data-act="login" data-role="${r.key}">
-          <div class="who"><span class="avatar">${esc(r.person.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><b>${esc(r.name)}</b><span style="display:block">${esc(r.person)}</span></div></div>
-          <span>${esc(r.desc)}</span></button>`).join('')}
-      </div>
-      <form class="fake-login" data-form="fakeLogin">
-        <div class="small muted">أو ادخل بالإيميل (البيانات متعبية جاهزة)</div>
-        <input name="email" value="admin@venice.bh" aria-label="الإيميل" dir="ltr">
-        <input name="password" type="password" value="venice2026" aria-label="كلمة السر" dir="ltr">
-        <button class="btn dark" type="submit">${icon('lock', 16)} دخول</button>
+      <div><h2>تسجيل الدخول</h2><p class="muted" style="margin:6px 0 0">مرحبًا بك في VENICE ERP</p></div>
+      ${DEMO.rolePicker ? rolePickerView() : ''}
+      <form class="stack" data-form="fakeLogin" style="max-width:420px">
+        <label class="f">البريد الإلكتروني<input name="email" value="admin@venice.bh" dir="ltr" autocomplete="username"></label>
+        <label class="f">كلمة المرور<input name="password" type="password" value="venice2026" dir="ltr" autocomplete="current-password"></label>
+        <label class="row small muted" style="gap:8px;cursor:pointer"><input type="checkbox" checked style="width:16px;height:16px"> تذكرني</label>
+        <button class="btn dark" type="submit" style="height:46px;font-size:16px">${icon('lock', 17)} تسجيل الدخول</button>
       </form>
     </section>
   </div>`;
@@ -63,25 +61,27 @@ function counts() {
 function shellView(content, page) {
   const r = store.role();
   const c = counts();
-  const navItems = NAV.filter((n) => store.can(n.key));
+  const navItems = NAV.filter((n) => store.locked(n.key) || store.can(n.key));
   return `<div class="shell">
     <aside class="side ${sideOpen ? 'open' : ''}" aria-label="القائمة">
       <div class="side-brand"><div class="mark">V</div><div><div class="brand-name">VENICE</div><div class="brand-tag">ERP · FACTORY</div></div></div>
       <nav class="nav">
-        ${navItems.map((n) => `<a href="#/${n.key}" class="${page === n.key ? 'on' : ''}" data-tour="nav-${n.key}">${icon(n.icon, 18)}<span>${r.key === 'tech' && n.key === 'production' ? 'مهامي في الورشة' : n.name}</span>${c[n.key] ? `<span class="badge">${c[n.key]}</span>` : ''}</a>`).join('')}
+        ${navItems.map((n) => store.locked(n.key)
+          ? `<a href="#/${n.key}" class="locked" aria-disabled="true" data-locked="1">${icon(n.icon, 18)}<span>${n.name}</span><span class="soon">قريبًا</span></a>`
+          : `<a href="#/${n.key}" class="${page === n.key ? 'on' : ''}" data-tour="nav-${n.key}">${icon(n.icon, 18)}<span>${r.key === 'tech' && n.key === 'production' ? 'مهامي في الورشة' : n.name}</span>${c[n.key] ? `<span class="badge">${c[n.key]}</span>` : ''}</a>`).join('')}
       </nav>
       <div class="side-foot">
         <div class="side-user"><span class="avatar">${esc(r.person.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><b>${esc(r.person)}</b><span>${esc(r.name)}</span></div></div>
-        <label class="small" style="color:#8f887b">جرّب النظام بدور تاني
+        ${DEMO.rolePicker ? `<label class="small" style="color:#8f887b">تغيير الدور
           <select data-change="switchRole" aria-label="تغيير الدور">${ROLES.map((x) => `<option value="${x.key}" ${x.key === r.key ? 'selected' : ''}>${x.name} · ${x.person}</option>`).join('')}</select>
-        </label>
-        <div class="row"><button class="btn sm ghost" style="color:#bfb8aa" data-act="startTour">${icon('play', 14)} الجولة</button><span class="spacer"></span><button class="btn sm ghost" style="color:#bfb8aa" data-act="logout">${icon('logout', 14)} خروج</button></div>
+        </label>` : ''}
+        <div class="row">${DEMO.tour ? `<button class="btn sm ghost" style="color:#bfb8aa" data-act="startTour">${icon('play', 14)} الجولة</button>` : ''}<span class="spacer"></span><button class="btn sm ghost" style="color:#bfb8aa" data-act="logout">${icon('logout', 14)} تسجيل الخروج</button></div>
       </div>
     </aside>
     <div class="main">
       <header class="top">
         <button class="icon-btn menu-btn" data-act="toggleSide" aria-label="القائمة">${icon('menu', 20)}</button>
-        <div class="search">${icon('search', 17)}<input id="gsearch" placeholder="ابحث عن عميل، تليفون، مشروع، فاتورة، خامة…" autocomplete="off" aria-label="بحث"><kbd>Ctrl K</kbd><div class="search-results" hidden></div></div>
+        <div class="search">${icon('search', 17)}<input id="gsearch" placeholder="بحث عن عميل أو رقم هاتف أو مشروع أو فاتورة…" autocomplete="off" aria-label="بحث"><kbd>Ctrl K</kbd><div class="search-results" hidden></div></div>
         <span class="spacer"></span>
         <button class="icon-btn" data-act="notifications" aria-label="التنبيهات">${icon('bell', 20)}${c.sales + c.production + c.inventory ? '<span class="dot"></span>' : ''}</button>
       </header>
@@ -96,7 +96,7 @@ export function render() {
   if (!store.can(page)) page = store.can('dashboard') ? 'dashboard' : 'production';
   const P = pages[page] || pages.dashboard;
   let html;
-  try { html = P.render(id, sub); } catch (e) { console.error(e); html = `<div class="note">حصلت مشكلة في عرض الصفحة: ${esc(e.message)}</div>`; }
+  try { html = P.render(id, sub); } catch (e) { console.error(e); html = `<div class="note">تعذّر عرض الصفحة: ${esc(e.message)}</div>`; }
   app.innerHTML = shellView(html, page);
   if (P.mount) P.mount(document.getElementById('page'), id, sub);
   tour.sync();
@@ -111,18 +111,18 @@ function searchItems(q) {
   s.customers.filter((c) => norm(c.name + c.phone + c.id).includes(n)).slice(0, 5).forEach((c) => out.push({ g: 'العملاء', ic: 'user', t: c.name, s: `${c.id} · ${c.phone}`, to: `customers/${c.id}`, show: store.can('customers') }));
   s.projects.filter((p) => norm(p.name + p.id + find.customer(p.customerId)?.name).includes(n)).slice(0, 5).forEach((p) => out.push({ g: 'المشاريع', ic: 'folder', t: p.name, s: `${p.id} · ${find.customer(p.customerId)?.name}`, to: `projects/${p.id}`, show: store.can('projects') }));
   s.quotes.filter((x) => norm(x.id + x.title + find.customer(x.customerId)?.name).includes(n)).slice(0, 4).forEach((x) => out.push({ g: 'العروض والفواتير', ic: 'receipt', t: `${x.id} · ${x.title}`, s: `${find.customer(x.customerId)?.name} · ${quoteTotal(x).toLocaleString('en-US')} د.ب`, to: `sales/${x.id}`, show: store.can('sales') }));
-  s.invoices.filter((x) => norm(x.id + find.customer(x.customerId)?.name).includes(n)).slice(0, 4).forEach((x) => out.push({ g: 'العروض والفواتير', ic: 'receipt', t: `${x.id}`, s: `${find.customer(x.customerId)?.name} · متبقي ${balanceOf(x).toLocaleString('en-US')} د.ب`, to: `sales/${x.id}`, show: store.can('sales') }));
+  s.invoices.filter((x) => norm(x.id + find.customer(x.customerId)?.name).includes(n)).slice(0, 4).forEach((x) => out.push({ g: 'العروض والفواتير', ic: 'receipt', t: `${x.id}`, s: `${find.customer(x.customerId)?.name} · المتبقي ${balanceOf(x).toLocaleString('en-US')} د.ب`, to: `sales/${x.id}`, show: store.can('sales') }));
   s.materials.filter((m) => norm(m.name + m.id).includes(n)).slice(0, 4).forEach((m) => out.push({ g: 'الخامات', ic: 'box', t: m.name, s: `الرصيد ${m.qty} ${m.unit}`, to: 'inventory', show: store.can('inventory') }));
   const actions = [
     { k: 'عرض سعر جديد', to: 'sales/new', perm: 'sales' }, { k: 'عميل جديد', to: 'customers/new', perm: 'customers' },
-    { k: 'كانبان الإنتاج', to: 'production', perm: 'production' }, { k: 'تقارير', to: 'reports', perm: 'reports' },
+    { k: 'لوحة الإنتاج', to: 'production', perm: 'production' }, { k: 'التقارير', to: 'reports', perm: 'reports' },
   ].filter((a) => a.k.replace(/\s/g, '').includes(n) && store.can(a.perm));
-  actions.forEach((a) => out.push({ g: 'إجراءات', ic: 'plus', t: a.k, s: 'اختصار', to: a.to, show: true }));
+  actions.forEach((a) => out.push({ g: 'إجراءات', ic: 'plus', t: a.k, s: 'إجراء سريع', to: a.to, show: true }));
   return out.filter((x) => x.show);
 }
 let selIdx = 0;
 function renderResults(box, items) {
-  if (!items.length) { box.innerHTML = '<div class="muted small" style="padding:12px">مالقيناش حاجة بالاسم ده. جرّب جزء من الاسم أو رقم التليفون.</div>'; box.hidden = false; return; }
+  if (!items.length) { box.innerHTML = '<div class="muted small" style="padding:12px">لا توجد نتائج مطابقة.</div>'; box.hidden = false; return; }
   let html = ''; let last = '';
   items.forEach((it, i) => {
     if (it.g !== last) { html += `<div class="grp">${it.g}</div>`; last = it.g; }
@@ -133,20 +133,25 @@ function renderResults(box, items) {
 
 // ---------- events ----------
 const coreHandlers = {
-  login(el) { store.session.role = el.dataset.role; store.save(); const r = store.role(); toast(`أهلًا ${r.person}، دخلت كـ${r.name}`, 'gold'); go(r.key === 'tech' ? 'production' : 'dashboard'); },
+  login(el) { store.session.role = el.dataset.role; store.save(); const r = store.role(); toast(`مرحبًا ${r.person}`, 'gold'); go(r.key === 'tech' ? 'production' : 'dashboard'); },
   logout() { store.session.role = null; store.save(); tour.stop(); location.hash = ''; render(); },
   toggleSide() { sideOpen = !sideOpen; document.querySelector('.side')?.classList.toggle('open', sideOpen); },
-  startTour() { tour.start(); },
+  startTour() { if (DEMO.tour) tour.start(); },
   notifications() { go('dashboard'); setTimeout(() => document.getElementById('attention')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); },
 };
 const coreForms = {
   fakeLogin() { coreHandlers.login({ dataset: { role: 'admin' } }); },
 };
 const changeHandlers = {
-  switchRole(el) { store.session.role = el.value; store.save(); const r = store.role(); toast(`دلوقتي إنت ${r.person} (${r.name}). لاحظ القايمة اتغيرت`, 'gold'); go(r.key === 'tech' ? 'production' : 'dashboard'); },
+  switchRole(el) { store.session.role = el.value; store.save(); const r = store.role(); toast(`تم التبديل إلى ${r.name}`, 'gold'); go(r.key === 'tech' ? 'production' : 'dashboard'); },
 };
 
 document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[href^="#/"]');
+  if (link) {
+    const pg = link.getAttribute('href').slice(2).split('/')[0];
+    if (store.locked(pg)) { e.preventDefault(); toast('هذا القسم سيتوفر في المرحلة القادمة', 'gold'); return; }
+  }
   const a = e.target.closest('[data-act]');
   if (a && !a.disabled) {
     const name = a.dataset.act; const fn = coreHandlers[name] || handlers[name] || tour.handlers[name];
@@ -196,5 +201,6 @@ window.addEventListener('afterprint', () => document.body.classList.remove('prin
 nav.go = go;
 nav.render = render;
 store.load();
+if (!DEMO.rolePicker && store.session.role && store.session.role !== 'admin') store.session.role = 'admin';
 store.listeners.push(() => tour.check());
 render();

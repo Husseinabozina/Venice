@@ -15,20 +15,24 @@ export function relDays(iso) {
   if (!iso) return '';
   const a = new Date(iso.slice(0, 10)); const b = new Date(new Date().toISOString().slice(0, 10));
   const d = Math.round((a - b) / 864e5);
-  if (d === 0) return 'النهارده';
-  if (d === 1) return 'بكرة';
-  if (d === -1) return 'امبارح';
-  if (d > 1) return `بعد ${d} أيام`;
-  return `من ${-d} أيام`;
+  if (d === 0) return 'اليوم';
+  if (d === 1) return 'غدًا';
+  if (d === -1) return 'أمس';
+  const n = (x) => (x >= 3 && x <= 10 ? `${x} أيام` : `${x} يومًا`);
+  if (d === 2) return 'بعد يومين';
+  if (d === -2) return 'منذ يومين';
+  if (d > 1) return `بعد ${n(d)}`;
+  return `منذ ${n(-d)}`;
 }
+export const dayCount = (x) => (x <= 0 ? 'أقل من يوم' : x === 1 ? 'يوم واحد' : x === 2 ? 'يومان' : x <= 10 ? `${x} أيام` : `${x} يومًا`);
 export const daysSince = (iso) => Math.round((new Date(new Date().toISOString().slice(0, 10)) - new Date(iso.slice(0, 10))) / 864e5);
 
 const CHIPS = {
-  draft: ['مسودة', 'neutral'], sent: ['اتبعت', 'info'], converted: ['اتحول لفاتورة', 'ok'], rejected: ['مرفوض', 'bad'],
+  draft: ['مسودة', 'neutral'], sent: ['مُرسَل', 'info'], converted: ['محوّل إلى فاتورة', 'ok'], rejected: ['مرفوض', 'bad'],
   paid: ['مدفوعة', 'ok'], partial: ['مدفوعة جزئيًا', 'warn'], unpaid: ['غير مدفوعة', 'bad'],
-  received: ['اتستلم', 'ok'], pending: ['معلّق', 'neutral'],
-  present: ['حاضر', 'ok'], absent: ['غايب', 'bad'], leave: ['إجازة', 'warn'],
-  low: ['إعادة طلب', 'bad'], okstock: ['متوفر', 'ok'], late: ['متأخر', 'bad'], done: ['اتسلّم', 'ok'],
+  received: ['تم الاستلام', 'ok'], pending: ['معلّق', 'neutral'],
+  present: ['حاضر', 'ok'], absent: ['غائب', 'bad'], leave: ['إجازة', 'warn'],
+  low: ['إعادة طلب', 'bad'], okstock: ['متوفر', 'ok'], late: ['متأخر', 'bad'], done: ['تم التسليم', 'ok'],
 };
 export function chip(key, text) {
   const [label, tone] = CHIPS[key] || [key, 'neutral'];

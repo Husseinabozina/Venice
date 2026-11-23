@@ -1,14 +1,22 @@
 // Demo data + store + business actions.
 // Everything lives in memory and is saved to localStorage so the demo survives a refresh.
+// DEMO.locked: sections shown in the menu as "قريبًا" (code kept, just switched off for this presentation).
+// DEMO.rolePicker / DEMO.tour: switched off for now; set to true to bring them back.
 // In the real system each action below becomes a REST API call to the Node.js server.
 
 const KEY = 'venice-erp-demo-v1';
+
+export const DEMO = {
+  locked: ['statements', 'inventory', 'purchases', 'costing', 'hr', 'reports', 'settings'],
+  rolePicker: false,
+  tour: false,
+};
 
 export const STAGES = [
   { key: 'design', name: 'اعتماد التصميم' },
   { key: 'prep', name: 'تجهيز الخامات' },
   { key: 'cnc', name: 'القص CNC' },
-  { key: 'edge', name: 'شريط الحرف' },
+  { key: 'edge', name: 'تركيب الحواف' },
   { key: 'assembly', name: 'التجميع' },
   { key: 'paint', name: 'الدهان' },
   { key: 'qc', name: 'فحص الجودة' },
@@ -17,26 +25,26 @@ export const STAGES = [
 export const DONE = STAGES.length; // stage index meaning "delivered"
 
 export const ROLES = [
-  { key: 'admin', name: 'المدير العام', person: 'خالد المنصوري', desc: 'يشوف كل الأقسام', nav: '*' },
+  { key: 'admin', name: 'المدير العام', person: 'خالد المنصوري', desc: 'جميع الأقسام', nav: '*' },
   { key: 'sales', name: 'المبيعات', person: 'ريم يوسف', desc: 'العملاء والعروض والفواتير', nav: ['dashboard', 'customers', 'statements', 'sales', 'projects'] },
-  { key: 'accountant', name: 'المحاسب', person: 'محمود السيد', desc: 'الفلوس والتحصيل والتقارير', nav: ['dashboard', 'customers', 'statements', 'sales', 'purchases', 'costing', 'reports'] },
+  { key: 'accountant', name: 'المحاسب', person: 'محمود السيد', desc: 'الحسابات والتحصيل والتقارير', nav: ['dashboard', 'customers', 'statements', 'sales', 'purchases', 'costing', 'reports'] },
   { key: 'production', name: 'مدير الإنتاج', person: 'جاسم علي', desc: 'الورشة ومراحل التصنيع', nav: ['dashboard', 'projects', 'production', 'inventory', 'costing'] },
   { key: 'store', name: 'أمين المخزن', person: 'سامي حداد', desc: 'الخامات والاستلام والصرف', nav: ['dashboard', 'inventory', 'purchases'] },
-  { key: 'hr', name: 'الموارد البشرية', person: 'نورة أحمد', desc: 'الموظفين والحضور والرواتب', nav: ['dashboard', 'hr'] },
-  { key: 'tech', name: 'الفني', person: 'راجو كومار', desc: 'مهامه في الورشة بس', nav: ['production'] },
+  { key: 'hr', name: 'الموارد البشرية', person: 'نورة أحمد', desc: 'الموظفون والحضور والرواتب', nav: ['dashboard', 'hr'] },
+  { key: 'tech', name: 'الفني', person: 'راجو كومار', desc: 'مهام الورشة المسندة إليه', nav: ['production'] },
 ];
 
 export const NAV = [
   { key: 'dashboard', name: 'لوحة التحكم', icon: 'dashboard' },
   { key: 'customers', name: 'العملاء', icon: 'users' },
   { key: 'statements', name: 'كشف حساب العملاء', icon: 'statement' },
-  { key: 'sales', name: 'العروض والفواتير', icon: 'receipt' },
+  { key: 'sales', name: 'عروض الأسعار والفواتير', icon: 'receipt' },
   { key: 'projects', name: 'المشاريع', icon: 'folder' },
   { key: 'production', name: 'الإنتاج', icon: 'factory' },
   { key: 'inventory', name: 'المخازن', icon: 'box' },
-  { key: 'purchases', name: 'المشتريات والموردين', icon: 'cart' },
+  { key: 'purchases', name: 'المشتريات والموردون', icon: 'cart' },
   { key: 'costing', name: 'تكلفة المشاريع', icon: 'coins' },
-  { key: 'hr', name: 'الموظفين', icon: 'badge' },
+  { key: 'hr', name: 'الموظفون', icon: 'badge' },
   { key: 'reports', name: 'التقارير', icon: 'chart' },
   { key: 'settings', name: 'الإعدادات', icon: 'settings' },
 ];
@@ -92,7 +100,7 @@ function seed() {
     { id: 'VEN-2026-0004', name: 'مطبخ فيلا سترة', customerId: 'CUS-005', type: 'مطبخ', value: 3900, stage: 2, stages: stagesFor(2, -15), location: 'سترة - فيلا 7', dimensions: '3.6م × 2.8م', materials: 'MDF / زجاج / ألومنيوم', notes: 'العميل التابع لـ ABC Contracting', files: [], expected: D(8), assignee: 'جاسم علي', laborHours: 30, machineHours: 10, otherCosts: 90, lateSince: D(-6) },
   ];
   const sched = (total, paidFirst, firstDue, secondDue) => [
-    { label: 'الدفعة الأولى (مقدم)', pct: 50, amount: total * 0.5, due: firstDue },
+    { label: 'الدفعة الأولى (مقدّم)', pct: 50, amount: total * 0.5, due: firstDue },
     { label: 'الدفعة الثانية (قبل التركيب)', pct: 50, amount: total * 0.5, due: secondDue },
   ];
   const quotes = [
@@ -141,10 +149,10 @@ function seed() {
     { id: 'EMP-010', name: 'نورة أحمد', dept: 'الإدارة', job: 'موارد بشرية', salary: 520, today: 'present' },
   ];
   const activity = [
-    { ts: D(-1) + ' 10:15', user: 'ريم يوسف', text: 'أنشأت عرض السعر QUO-2026-006 لـ ABC Contracting', ref: 'sales/QUO-2026-006' },
-    { ts: D(-2) + ' 13:40', user: 'سامي حداد', text: 'أرسل أمر الشراء PO-2026-001 لمورد الزجاج', ref: 'purchases' },
-    { ts: D(-3) + ' 09:05', user: 'ريم يوسف', text: 'أرسلت عرض السعر QUO-2026-005 لعلي حسن على الواتساب', ref: 'sales/QUO-2026-005' },
-    { ts: D(-6) + ' 11:30', user: 'جاسم علي', text: 'نقل مطبخ فيلا سترة لمرحلة القص CNC', ref: 'projects/VEN-2026-0004' },
+    { ts: D(-1) + ' 10:15', user: 'ريم يوسف', text: 'إنشاء عرض السعر QUO-2026-006 لـ ABC Contracting', ref: 'sales/QUO-2026-006' },
+    { ts: D(-2) + ' 13:40', user: 'سامي حداد', text: 'إرسال أمر الشراء PO-2026-001 إلى مورد الزجاج', ref: 'purchases' },
+    { ts: D(-3) + ' 09:05', user: 'ريم يوسف', text: 'إرسال عرض السعر QUO-2026-005 إلى علي حسن عبر واتساب', ref: 'sales/QUO-2026-005' },
+    { ts: D(-6) + ' 11:30', user: 'جاسم علي', text: 'نقل مطبخ فيلا سترة إلى مرحلة القص CNC', ref: 'projects/VEN-2026-0004' },
   ];
   return {
     company: { name: 'VENICE FURNITURE WORKSHOP W.L.L', nameAr: 'فينيسيا للأثاث والورش', country: 'مملكة البحرين', currency: 'د.ب', users: '10–20' },
@@ -170,7 +178,8 @@ export const store = {
   },
   reset() { this.state = seed(); this.save(); },
   role() { return ROLES.find((r) => r.key === this.session.role); },
-  can(page) { const r = this.role(); return !!r && (r.nav === '*' || r.nav.includes(page)); },
+  can(page) { if (DEMO.locked.includes(page)) return false; const r = this.role(); return !!r && (r.nav === '*' || r.nav.includes(page)); },
+  locked(page) { return DEMO.locked.includes(page); },
 };
 
 const S = () => store.state;
@@ -231,66 +240,66 @@ export const isLate = (p) => !!p.lateSince && p.stage < DONE;
 export const act = {
   addCustomer(data) {
     const c = { id: nextId('CUS'), since: today(), parentId: null, ...data };
-    S().customers.push(c); log(`أضاف العميل ${c.name}`, `customers/${c.id}`); store.save(); return c;
+    S().customers.push(c); log(`إضافة العميل ${c.name}`, `customers/${c.id}`); store.save(); return c;
   },
   saveQuote(data) {
     const q = { id: nextId('QUO'), date: today(), validDays: 15, status: 'draft', ...data };
-    S().quotes.unshift(q); log(`أنشأ عرض السعر ${q.id} لـ ${find.customer(q.customerId)?.name}`, `sales/${q.id}`); store.save(); return q;
+    S().quotes.unshift(q); log(`إنشاء عرض السعر ${q.id} لـ ${find.customer(q.customerId)?.name}`, `sales/${q.id}`); store.save(); return q;
   },
   sendQuote(id, channel) {
     const q = find.quote(id); if (q.status === 'draft') q.status = 'sent';
-    log(`أرسل عرض السعر ${id} على ${channel}`, `sales/${id}`); store.save();
+    log(`إرسال عرض السعر ${id} عبر ${channel}`, `sales/${id}`); store.save();
   },
-  rejectQuote(id) { const q = find.quote(id); q.status = 'rejected'; log(`سجّل رفض العميل لعرض السعر ${id}`, `sales/${id}`); store.save(); },
+  rejectQuote(id) { const q = find.quote(id); q.status = 'rejected'; log(`تسجيل رفض العميل لعرض السعر ${id}`, `sales/${id}`); store.save(); },
   convertQuote(id) {
     const s = S(); const q = find.quote(id); const total = quoteTotal(q);
     const pid = nextId('VEN');
     const project = { id: pid, name: q.title, customerId: q.customerId, type: q.type, value: total, stage: 0, stages: STAGES.map((st, i) => ({ key: st.key, start: i === 0 ? today() : null, end: null })), location: find.customer(q.customerId)?.address || '', dimensions: 'قيد الاعتماد', materials: '', notes: '', files: [], expected: daysFrom(30), assignee: 'جاسم علي', laborHours: 0, machineHours: 0, otherCosts: 0 };
     const inv = { id: nextId('INV'), quoteId: q.id, customerId: q.customerId, projectId: pid, date: today(), total, schedule: [
-      { label: 'الدفعة الأولى (مقدم)', pct: 50, amount: total * 0.5, due: today() },
+      { label: 'الدفعة الأولى (مقدّم)', pct: 50, amount: total * 0.5, due: today() },
       { label: 'الدفعة الثانية (قبل التركيب)', pct: 50, amount: total * 0.5, due: daysFrom(29) },
     ] };
     q.status = 'converted';
     s.projects.unshift(project); s.invoices.unshift(inv);
-    log(`حوّل عرض السعر ${q.id} للفاتورة ${inv.id} وفتح المشروع ${pid}`, `sales/${inv.id}`); store.save();
+    log(`تحويل عرض السعر ${q.id} إلى الفاتورة ${inv.id} وفتح المشروع ${pid}`, `sales/${inv.id}`); store.save();
     return { inv, project };
   },
   addReceipt({ invoiceId, amount, method, date }) {
     const inv = find.invoice(invoiceId); const bal = balanceOf(inv);
-    if (amount <= 0) throw new Error('اكتب مبلغ أكبر من صفر');
-    if (amount > bal + 0.0005) throw new Error(`المبلغ أكبر من المتبقي (${bal.toFixed(3)})`);
+    if (amount <= 0) throw new Error('يرجى إدخال مبلغ أكبر من صفر');
+    if (amount > bal + 0.0005) throw new Error(`المبلغ أكبر من الرصيد المتبقي (${bal.toFixed(3)})`);
     const installment = paidOf(inv) >= inv.schedule[0].amount - 0.0005 ? 1 : 0;
     const r = { id: nextId('REC'), invoiceId, amount, method, date: date || today(), installment };
-    S().receipts.unshift(r); log(`سجّل دفعة ${amount.toFixed(3)} د.ب على ${invoiceId} (سند ${r.id})`, `sales/${invoiceId}`); store.save(); return r;
+    S().receipts.unshift(r); log(`تسجيل دفعة ${amount.toFixed(3)} د.ب على ${invoiceId} (سند ${r.id})`, `sales/${invoiceId}`); store.save(); return r;
   },
   moveStage(pid, dir = 1) {
     const p = find.project(pid); const from = p.stage; const to = Math.max(0, Math.min(DONE, from + dir));
     if (to === from) return p;
     if (dir > 0) { if (p.stages[from]) p.stages[from].end = today(); if (p.stages[to]) p.stages[to].start = today(); }
     p.stage = to; delete p.lateSince;
-    log(to === DONE ? `سلّم المشروع ${p.name} للعميل` : `نقل ${p.name} لمرحلة ${STAGES[to].name}`, `projects/${pid}`); store.save(); return p;
+    log(to === DONE ? `تسليم المشروع ${p.name} للعميل` : `نقل ${p.name} إلى مرحلة ${STAGES[to].name}`, `projects/${pid}`); store.save(); return p;
   },
   setStage(pid, to) { const p = find.project(pid); const dir = to - p.stage; if (!dir) return; for (let i = 0; i < Math.abs(dir); i++) this.moveStage(pid, Math.sign(dir)); },
   issueMaterial({ materialId, qty, projectId }) {
     const m = find.material(materialId);
-    if (!(qty > 0)) throw new Error('اكتب كمية صحيحة');
-    if (qty > m.qty) throw new Error(`الرصيد المتاح ${m.qty} ${m.unit} بس`);
+    if (!(qty > 0)) throw new Error('يرجى إدخال كمية صحيحة');
+    if (qty > m.qty) throw new Error(`الرصيد المتاح ${m.qty} ${m.unit} فقط`);
     m.qty -= qty;
     S().movements.unshift({ id: nextId('MOV'), materialId, type: 'out', qty, date: today(), projectId, by: store.role()?.person });
-    log(`صرف ${qty} ${m.unit} ${m.name} على ${find.project(projectId)?.name}`, `projects/${projectId}`); store.save(); return m;
+    log(`صرف ${qty} ${m.unit} ${m.name} لمشروع ${find.project(projectId)?.name}`, `projects/${projectId}`); store.save(); return m;
   },
   createPO({ supplierId, materialId, qty, cost }) {
     const po = { id: nextId('PO'), supplierId, materialId, qty, cost, date: today(), status: 'sent' };
-    S().pos.unshift(po); log(`أرسل أمر الشراء ${po.id} لـ ${find.supplier(supplierId)?.name}`, 'purchases'); store.save(); return po;
+    S().pos.unshift(po); log(`إرسال أمر الشراء ${po.id} إلى ${find.supplier(supplierId)?.name}`, 'purchases'); store.save(); return po;
   },
   receivePO(id) {
     const po = S().pos.find((p) => p.id === id); const m = find.material(po.materialId);
     po.status = 'received'; po.received = today(); m.qty += po.qty;
     S().movements.unshift({ id: nextId('MOV'), materialId: m.id, type: 'in', qty: po.qty, date: today(), poId: po.id, by: store.role()?.person });
-    log(`استلم ${po.qty} ${m.unit} ${m.name} من أمر الشراء ${po.id}`, 'inventory'); store.save(); return po;
+    log(`استلام ${po.qty} ${m.unit} ${m.name} من أمر الشراء ${po.id}`, 'inventory'); store.save(); return po;
   },
-  updateProject(pid, patch) { Object.assign(find.project(pid), patch); log(`عدّل بيانات المشروع ${pid}`, `projects/${pid}`); store.save(); },
-  addFile(pid, name) { const p = find.project(pid); p.files.push({ name, size: '—' }); log(`رفع الملف ${name} على ${p.name}`, `projects/${pid}`); store.save(); },
+  updateProject(pid, patch) { Object.assign(find.project(pid), patch); log(`تعديل بيانات المشروع ${pid}`, `projects/${pid}`); store.save(); },
+  addFile(pid, name) { const p = find.project(pid); p.files.push({ name, size: '—' }); log(`رفع الملف ${name} إلى ${p.name}`, `projects/${pid}`); store.save(); },
   setAttendance(eid, v) { const e = S().employees.find((x) => x.id === eid); e.today = v; store.save(); },
-  setTerms(list) { S().terms = list; log('عدّل بنود العقد'); store.save(); },
+  setTerms(list) { S().terms = list; log('تعديل بنود العقد'); store.save(); },
 };
