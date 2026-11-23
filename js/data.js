@@ -1,15 +1,15 @@
 // Demo data + store + business actions.
 // Everything lives in memory and is saved to localStorage so the demo survives a refresh.
 // DEMO.locked: sections shown in the menu as "قريبًا" (code kept, just switched off for this presentation).
-// DEMO.rolePicker / DEMO.tour: switched off for now; set to true to bring them back.
+// DEMO.rolePicker / DEMO.tour: role selection on the login screen and the guided tour.
 // In the real system each action below becomes a REST API call to the Node.js server.
 
 const KEY = 'venice-erp-demo-v1';
 
 export const DEMO = {
   locked: [],
-  rolePicker: false,
-  tour: false,
+  rolePicker: true,
+  tour: true,
 };
 
 export const STAGES = [
@@ -272,7 +272,7 @@ export const act = {
     if (amount > bal + 0.0005) throw new Error(`المبلغ أكبر من الرصيد المتبقي (${bal.toFixed(3)})`);
     const installment = paidOf(inv) >= inv.schedule[0].amount - 0.0005 ? 1 : 0;
     const r = { id: nextId('REC'), invoiceId, amount, method, date: date || today(), installment };
-    S().receipts.unshift(r); log(`تسجيل دفعة ${amount.toFixed(3)} د.ب على ${invoiceId} (سند ${r.id})`, `sales/${invoiceId}`); store.save(); return r;
+    S().receipts.unshift(r); log(`تسجيل دفعة ${amount.toLocaleString('en-US', { minimumFractionDigits: 3 })} د.ب على ${invoiceId} (سند ${r.id})`, `sales/${invoiceId}`); store.save(); return r;
   },
   moveStage(pid, dir = 1) {
     const p = find.project(pid); const from = p.stage; const to = Math.max(0, Math.min(DONE, from + dir));

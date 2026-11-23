@@ -438,3 +438,25 @@ tfoot td { font-weight: 600; background: #fbfaf6; }
 .lang button.on { background: var(--ink); color: #f3e7c9; }
 .lang button:not(.on):hover { color: var(--ink); background: #f3efe6; }
 .stack > *, .cols > *, .shell > *, .page > * { min-width: 0; }
+.login-side > .login-card.has-roles { max-width: 520px; }
+.role-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 22px; }
+.rp { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 11px; background: #fff; cursor: pointer; text-align: right; font: inherit; color: inherit; transition: border-color .15s, background .15s, box-shadow .15s; }
+.rp:first-child { grid-column: 1 / -1; }
+.rp:hover { border-color: var(--line-2); background: #fbf9f4; }
+.rp.on { border-color: var(--gold); background: #fbf6ea; box-shadow: inset 0 0 0 1px var(--gold); }
+.rp .avatar { width: 32px; height: 32px; font-size: 12.5px; }
+.rp.on .avatar { background: var(--ink); color: #f0dfb4; }
+.rp-t { display: grid; line-height: 1.35; min-width: 0; }
+.rp-t b { font-size: 14.5px; font-weight: 600; }
+.rp-t span { font-size: 12.5px; color: var(--muted); }
+.rp:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.tour-link { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; cursor: pointer; text-align: right; font: inherit; color: inherit; transition: border-color .15s, box-shadow .15s; }
+.tour-link:hover { border-color: var(--gold); box-shadow: var(--shadow); }
+.tour-link .play { width: 34px; height: 34px; border-radius: 50%; background: var(--ink); color: var(--gold-2); display: grid; place-items: center; flex: none; }
+.tour-link > span:nth-child(2) { flex: 1; display: grid; line-height: 1.4; }
+.tour-link b { font-size: 15px; font-weight: 600; }
+.tour-link > span:nth-child(2) span { font-size: 12.5px; color: var(--muted); }
+.tour-link > .ic { color: var(--muted); }
+.login-side > .tour-link { max-width: 520px; }
+.login-card.has-roles .lc-mark { display: none; }
+.login-card.has-roles { padding-top: 34px; }

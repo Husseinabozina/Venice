@@ -62,14 +62,14 @@ export default {
     return `
     <div class="page-head"><div><p style="margin:0">${greet}</p><h1>مرحبًا، ${esc(r.person.split(' ')[0])}</h1></div>
       <div class="row">${store.can('sales') ? `<a class="btn primary" href="#/sales/new" data-tour="new-quote-top">${icon('plus', 16)} عرض سعر جديد</a>` : ''}${store.can('customers') ? `<a class="btn" href="#/customers/new">${icon('user', 16)} عميل جديد</a>` : ''}</div></div>
-    ${role === 'admin' && DEMO.tour ? `<button class="tour-cta" style="margin-bottom:18px" data-act="startTour"><span class="play">${icon('play', 20)}</span><span><b>جولة الدورة الكاملة</b><span>امشي بنفسك في رحلة مطبخ كامل: عميل ← عرض سعر ← فاتورة ← ورشة ← مخزن ← ربح ← تسليم</span></span></button>` : ''}
+    ${role === 'admin' && DEMO.tour ? `<button class="tour-cta" style="margin-bottom:18px" data-act="startTour"><span class="play">${icon('play', 20)}</span><span><b>جولة الدورة الكاملة</b><span>عميل ← عرض سعر ← فاتورة ← إنتاج ← مخزون ← تكلفة ← تسليم</span></span></button>` : ''}
     <div class="kpis">${kpis}</div>
     <div class="cols">
       <div class="card" id="attention"><div class="card-head"><h3>بحاجة إلى متابعة اليوم</h3><span class="chip neutral">${att.length}</span></div>
         <div class="list">${att.length ? att.map((a) => `<a class="li" href="#/${a.to}"><span class="ico ${a.tone}">${icon(a.ic, 17)}</span><span style="flex:1;min-width:0"><span class="t" style="display:block">${esc(a.t)}</span><span class="s">${esc(a.s)}</span></span>${a.tag}</a>`).join('') : '<div class="empty">' + icon('check', 28) + '<h4>لا توجد متأخرات</h4><p>جميع الأعمال تسير وفق الجدول.</p></div>'}</div>
       </div>
       <div class="stack">
-        ${store.can('production') || store.can('projects') ? `<div class="card"><div class="card-head"><h3>الورشة الآن</h3><a class="btn sm ghost" href="#/production">لوحة الإنتاج ${icon('chevron', 14)}</a></div>
+        ${store.can('production') || store.can('projects') ? `<div class="card"><div class="card-head"><h3>الورشة الآن</h3>${store.can('production') ? `<a class="btn sm ghost" href="#/production">لوحة الإنتاج ${icon('chevron', 14)}</a>` : ''}</div>
           <div class="card-pad hbars">${stageCounts.map((x) => `<div class="r"><span>${x.name}</span><div class="bar"><span style="width:${(x.n / maxN) * 100}%"></span></div><span class="num muted" style="white-space:nowrap">${x.n} مشروع</span></div>`).join('')}</div></div>` : ''}
         <div class="card"><div class="card-head"><h3>آخر النشاطات</h3></div>
           <div class="act">${s.activity.slice(0, 6).map((a) => `<div class="a"><span class="avatar">${esc(a.user.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><div>${esc(a.text)}</div><div class="s">${esc(a.user)} · ${esc(a.ts.slice(11))} · ${relDays(a.ts)}</div></div></div>`).join('')}</div></div>

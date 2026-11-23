@@ -17,14 +17,14 @@ function route() {
 }
 
 // ---------- login ----------
+let loginRole = 'admin';
+const initials = (n) => esc(n.split(' ').map((w) => w[0]).join('').slice(0, 2));
+const roleEmail = (k) => `${k}@venice.bh`;
 function rolePickerView() {
-  // Kept for later: one-click login per role + guided tour (switched off via DEMO.rolePicker / DEMO.tour).
-  return `${DEMO.tour ? `<button class="tour-cta" data-act="startTour"><span class="play">${icon('play', 20)}</span><span><b>جولة الدورة الكاملة</b><span>${TOUR_STEPS} خطوة</span></span></button>` : ''}
-      <div class="role-grid">
-        ${ROLES.map((r, i) => `<button class="role-card ${i === 0 ? 'featured' : ''}" data-act="login" data-role="${r.key}">
-          <div class="who"><span class="avatar">${esc(r.person.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><b>${esc(r.name)}</b><span style="display:block">${esc(r.person)}</span></div></div>
-          <span>${esc(r.desc)}</span></button>`).join('')}
-      </div>`;
+  return `<div class="role-pick" role="radiogroup" aria-label="الحساب">
+      ${ROLES.map((r) => `<button type="button" class="rp ${r.key === loginRole ? 'on' : ''}" role="radio" aria-checked="${r.key === loginRole}" data-act="pickRole" data-role="${r.key}">
+        <span class="avatar">${initials(r.person)}</span><span class="rp-t"><b>${esc(r.name)}</b><span>${esc(r.person)}</span></span></button>`).join('')}
+    </div>`;
 }
 function loginView() {
   return `<div class="login">
@@ -39,18 +39,19 @@ function loginView() {
       <div class="lb-foot"><span>VENICE FURNITURE WORKSHOP W.L.L</span><span>مملكة البحرين</span></div>
     </section>
     <section class="login-side">
-      ${DEMO.rolePicker ? rolePickerView() : ''}
-      <div class="login-card">
+      <div class="login-card ${DEMO.rolePicker ? 'has-roles' : ''}">
         <div class="lc-mark">${logo(44)}</div>
         <h2>تسجيل الدخول</h2>
-        <p class="muted">مرحبًا بك في VENICE ERP</p>
+        <p class="muted">${DEMO.rolePicker ? 'اختر الحساب للدخول' : 'مرحبًا بك في VENICE ERP'}</p>
+        ${DEMO.rolePicker ? rolePickerView() : ''}
         <form class="stack" data-form="fakeLogin">
-          <label class="f">البريد الإلكتروني<input name="email" value="admin@venice.bh" dir="ltr" autocomplete="username"></label>
+          <label class="f">البريد الإلكتروني<input name="email" value="${roleEmail(loginRole)}" dir="ltr" autocomplete="username"></label>
           <label class="f">كلمة المرور<input name="password" type="password" value="venice2026" dir="ltr" autocomplete="current-password"></label>
           <label class="row small muted" style="gap:8px;cursor:pointer"><input type="checkbox" checked style="width:16px;height:16px"> تذكرني</label>
           <button class="btn dark" type="submit">${icon('lock', 17)} تسجيل الدخول</button>
         </form>
       </div>
+      ${DEMO.tour ? `<button class="tour-link" type="button" data-act="startTour"><span class="play">${icon('play', 15)}</span><span><b>جولة الدورة الكاملة</b><span>${TOUR_STEPS} خطوة من العميل حتى التسليم</span></span>${icon('chevron', 15)}</button>` : ''}
       <div class="login-copy">© 2026 VENICE ERP</div>
     </section>
   </div>`;
@@ -102,7 +103,7 @@ function shellView(content, page) {
 export function render() {
   if (!store.session.role) { app.innerHTML = loginView(); tour.sync(); return; }
   let { page, id, sub } = route();
-  if (!store.can(page)) page = store.can('dashboard') ? 'dashboard' : 'production';
+  if (!store.can(page)) { page = store.can('dashboard') ? 'dashboard' : 'production'; id = undefined; sub = undefined; history.replaceState(null, '', `#/${page}`); }
   const P = pages[page] || pages.dashboard;
   let html;
   try { html = P.render(id, sub); } catch (e) { console.error(e); html = `<div class="note">تعذّر عرض الصفحة: ${esc(e.message)}</div>`; }
@@ -145,12 +146,17 @@ const coreHandlers = {
   login(el) { store.session.role = el.dataset.role; store.save(); const r = store.role(); toast(`مرحبًا ${r.person}`, 'gold'); go(r.key === 'tech' ? 'production' : 'dashboard'); },
   logout() { store.session.role = null; store.save(); tour.stop(); location.hash = ''; render(); },
   toggleSide() { sideOpen = !sideOpen; document.querySelector('.side')?.classList.toggle('open', sideOpen); },
+  pickRole(el) {
+    loginRole = el.dataset.role;
+    document.querySelectorAll('.rp').forEach((b) => { const on = b.dataset.role === loginRole; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    const em = document.querySelector('form[data-form=fakeLogin] input[name=email]'); if (em) em.value = roleEmail(loginRole);
+  },
   startTour() { if (DEMO.tour) tour.start(); },
   langEn() { toast('الواجهة الإنجليزية ستتوفر في المرحلة القادمة', 'gold'); },
   notifications() { go('dashboard'); setTimeout(() => document.getElementById('attention')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); },
 };
 const coreForms = {
-  fakeLogin() { coreHandlers.login({ dataset: { role: 'admin' } }); },
+  fakeLogin() { coreHandlers.login({ dataset: { role: DEMO.rolePicker ? loginRole : 'admin' } }); },
 };
 const changeHandlers = {
   switchRole(el) { store.session.role = el.value; store.save(); const r = store.role(); toast(`تم التبديل إلى ${r.name}`, 'gold'); go(r.key === 'tech' ? 'production' : 'dashboard'); },

@@ -14,60 +14,60 @@ const S = () => store.state;
 const lastNew = (arr, base) => (arr.length > base ? arr[arr.length - 1] : null);
 
 const STEPS = [
-  { title: 'أهلًا بيك في فينيسيا', route: () => 'dashboard',
-    text: 'هتمشي بنفسك في رحلة مطبخ كامل: زبونة جديدة اسمها منى عايزة مطبخ لفيلتها في الجفير. هنعمل لها عرض سعر، ونحوّله لفاتورة، ونتابعه في الورشة، ونصرف خامات، ونشوف الربح، لحد ما نسلّم ونحصّل.',
-    why: 'في كل خطوة هتلاقي زرار منوّر بالدهبي. اضغط عليه، والبيانات بتتملي لوحدها.' },
+  { title: 'جولة الدورة الكاملة', route: () => 'dashboard',
+    text: 'رحلة مطبخ كامل لعميلة جديدة (منى حسين): عرض سعر، ثم فاتورة، ثم الإنتاج وصرف الخامات، ثم التكلفة والربح، حتى التسليم والتحصيل.',
+    why: 'في كل خطوة يُميَّز الزر المطلوب باللون الذهبي، والبيانات تُعبَّأ تلقائيًا.' },
   { title: 'عميل جديد', route: () => 'customers', target: 'new-customer',
-    text: 'اضغط «عميل جديد»، وبعدين «املأ ببيانات تجريبية»، واحفظ.',
-    why: 'كل عميل ليه ملف واحد فيه مشاريعه وفواتيره ودفعاته، والنظام بيمنع تكرار نفس رقم التليفون.',
+    text: 'اضغط «عميل جديد»، ثم «تعبئة تلقائية»، ثم «حفظ العميل».',
+    why: 'لكل عميل ملف واحد يجمع مشاريعه وفواتيره ودفعاته.',
     done: () => { const c = S().customers.find((x) => x.name === 'منى حسين'); if (c) T.customerId = c.id; return !!c; } },
   { title: 'عرض سعر من ملف العميل', route: () => `customers/${T.customerId}`, target: 'quote-from-customer', alt: 'autofill-quote',
-    text: 'من ملف منى اضغط «عرض سعر جديد». في الصفحة الجاية اضغط «املأ ببيانات تجريبية»، وبعدين «حفظ وإرسال للعميل».',
-    why: 'العرض فيه بنود، والإجمالي والمقدم بيتحسبوا لوحدهم. والعرض بيتطبع بهوية الشركة الأسود والدهبي.',
+    text: 'من ملف العميلة اضغط «عرض سعر جديد»، ثم «تعبئة تلقائية»، ثم «حفظ وإرسال للعميل».',
+    why: 'الإجمالي والمقدّم يُحسبان تلقائيًا، ويُطبع العرض بهوية الشركة.',
     done: () => { const q = S().quotes.find((x) => x.customerId === T.customerId); if (q) T.quoteId = q.id; return !!q; } },
-  { title: 'منى وافقت!', route: () => `sales/${T.quoteId}`, target: 'convert',
-    text: 'اضغط «العميل وافق: حوّل لفاتورة». ضغطة واحدة بتعمل ٣ حاجات مع بعض.',
-    why: 'فاتورة بدفعتين (٥٠٪ مقدم و٥٠٪ قبل التركيب)، ومشروع جديد في الورشة، والعرض يتقفل. مافيش حاجة بتتكتب مرتين.',
+  { title: 'موافقة العميلة', route: () => `sales/${T.quoteId}`, target: 'convert',
+    text: 'اضغط «تحويل إلى فاتورة».',
+    why: 'تُنشأ فاتورة على دفعتين (50% مقدّمًا و50% قبل التركيب) ومشروع جديد في الإنتاج، دون إعادة إدخال أي بيانات.',
     done: () => { const i = S().invoices.find((x) => x.quoteId === T.quoteId); if (i) { T.invoiceId = i.id; T.projectId = i.projectId; } return !!i; } },
-  { title: 'تسجيل المقدم', route: () => `sales/${T.invoiceId}`, target: 'pay-0',
-    text: 'اضغط «سجّل الدفعة» جنب الدفعة الأولى. المبلغ متعبي جاهز، اختار طريقة الدفع (BenefitPay مثلًا) واحفظ.',
-    why: 'بيطلع سند قبض رسمي تبعته على الواتساب، وحالة الفاتورة تتغير لوحدها لـ«مدفوعة جزئيًا»، وكشف حساب العميل يتحدث.',
+  { title: 'تسجيل المقدّم', route: () => `sales/${T.invoiceId}`, target: 'pay-0',
+    text: 'اضغط «تسجيل الدفعة» بجانب الدفعة الأولى، واختر طريقة الدفع، ثم احفظ.',
+    why: 'يصدر سند قبض يمكن إرساله عبر واتساب، وتتحدّث حالة الفاتورة وكشف حساب العميل تلقائيًا.',
     done: () => T.invoiceId && paidOf(find.invoice(T.invoiceId)) > 0 },
   { title: 'اعتماد التصميم', route: () => `projects/${T.projectId}`, target: 'advance',
-    text: 'ده ملف المشروع اللي اتفتح لوحده. منى اعتمدت التصميم؟ اضغط الزرار الدهبي عشان المشروع يدخل مرحلة تجهيز الخامات.',
-    why: 'كل مرحلة بتتسجل بتاريخها ومين نقلها. ولو أحمد اتصل يسأل «مطبخي فين؟» أي موظف يرد في ثانية.',
+    text: 'هذا ملف المشروع الذي أُنشئ تلقائيًا. اضغط الزر الذهبي لاعتماد التصميم والانتقال إلى تجهيز الخامات.',
+    why: 'تُسجَّل كل مرحلة بتاريخها والمستخدم الذي نقلها.',
     done: () => find.project(T.projectId)?.stage >= 1 },
-  { title: 'صرف خامات على المطبخ', route: () => `projects/${T.projectId}`, target: 'issue-from-project',
-    text: 'اضغط «صرف خامات». اختار MDF 18 مم والكمية ١٢، واحفظ.',
-    why: 'الرصيد ينقص من المخزن، والتكلفة تتسجل على مطبخ منى بسعرها. ولو الخامة نزلت تحت حد الطلب، النظام ينبّه.',
+  { title: 'صرف الخامات', route: () => `projects/${T.projectId}`, target: 'issue-from-project',
+    text: 'اضغط «صرف خامات»، واختر MDF 18 مم بكمية 12، ثم «تأكيد الصرف».',
+    why: 'ينقص الرصيد من المخزن وتُضاف التكلفة إلى المشروع، ويظهر تنبيه عند الوصول إلى حد الطلب.',
     done: () => S().movements.some((m) => m.projectId === T.projectId) },
-  { title: 'الخشب قرّب يخلص', route: () => 'inventory', target: 'reorder-MAT-001',
-    text: 'MDF 18 مم بقى تحت حد الطلب (بالأحمر). اضغط «اطلب من المورد»: المورد والكمية متعبيين، ابعت أمر الشراء.',
-    why: 'كده الورشة مش هتقف عشان لوح ناقص.',
+  { title: 'تنبيه حد الطلب', route: () => 'inventory', target: 'reorder-MAT-001',
+    text: 'أصبح MDF 18 مم أقل من حد الطلب. اضغط «طلب شراء»، ثم «إرسال أمر الشراء».',
+    why: 'المورد والكمية مقترحان تلقائيًا.',
     done: () => { const p = S().pos.find((x) => x.materialId === 'MAT-001' && x.id !== 'PO-2026-002'); if (p) T.poId = p.id; return !!p; } },
-  { title: 'البضاعة وصلت', route: () => 'purchases', target: () => `receive-${T.poId}`,
-    text: 'اضغط «استلام» على أمر الشراء، وأكّد.',
-    why: 'المخزن يزيد لوحده، والمبلغ يتسجل على الشركة للمورد في تقرير مستحقات الموردين.',
+  { title: 'استلام البضاعة', route: () => 'purchases', target: () => `receive-${T.poId}`,
+    text: 'اضغط «استلام» على أمر الشراء، ثم «تأكيد الاستلام».',
+    why: 'يزيد رصيد المخزن، ويُسجَّل المبلغ مستحقًا للمورد.',
     done: () => S().pos.find((x) => x.id === T.poId)?.status === 'received' },
-  { title: 'الورشة (كانبان)', route: () => 'production', target: () => `knext-${T.projectId}`,
-    text: 'كل مطبخ كارت، وكل عمود مرحلة. حرّك مطبخ منى للأمام بالسهم أو بالسحب. أو اضغط «اختصر» تحت عشان يروح للتركيب على طول.',
-    why: 'المدير يشوف الورشة كلها في شاشة واحدة، والكارت الأحمر يعني متأخر.',
-    shortcut: { label: 'اختصر: وديه لمرحلة التركيب', run: () => { act.setStage(T.projectId, DONE - 1); } },
+  { title: 'لوحة الإنتاج', route: () => 'production', target: () => `knext-${T.projectId}`,
+    text: 'كل مشروع بطاقة، وكل عمود مرحلة. انقل المشروع بزر «المرحلة التالية» أو بالسحب، أو استخدم الاختصار أدناه.',
+    why: 'حالة الورشة كلها في شاشة واحدة، والبطاقة الحمراء تعني تأخيرًا.',
+    shortcut: { label: 'الانتقال مباشرة إلى مرحلة التركيب', run: () => { act.setStage(T.projectId, DONE - 1); } },
     done: () => find.project(T.projectId)?.stage >= DONE - 1 },
-  { title: 'المطبخ ده كسّب كام؟', route: () => `costing/${T.projectId}`,
-    text: 'ده أهم سؤال عند صاحب الشركة. شوف الخامات اللي صرفتها ظاهرة بسعرها. جرّب تكتب ساعات العمال (٤٠ مثلًا) واضغط «حفظ وإعادة الحساب».',
-    why: 'في النموذج القديم الأرقام دي كانت ثابتة. هنا بتتحسب من الشغل الفعلي.' },
-  { title: 'الدفعة التانية قبل التركيب', route: () => `sales/${T.invoiceId}`, target: 'pay-1',
-    text: 'التركيب بكرة، يبقى نحصّل الـ٥٠٪ الباقية. اضغط «سجّل الدفعة» واحفظ.',
-    why: 'لوحة التحكم بتنبّه المحاسب بالدفعات اللي ميعادها قرّب أو اتأخر.',
+  { title: 'تكلفة المشروع وربحه', route: () => `costing/${T.projectId}`,
+    text: 'تظهر الخامات المصروفة بتكلفتها. أدخل ساعات العمل (40 مثلًا) واضغط «حفظ».',
+    why: 'التكلفة تُحسب من العمل الفعلي على المشروع.' },
+  { title: 'الدفعة الثانية', route: () => `sales/${T.invoiceId}`, target: 'pay-1',
+    text: 'قبل التركيب تُحصَّل الـ50% المتبقية. اضغط «تسجيل الدفعة» ثم احفظ.',
+    why: 'تنبّه لوحة التحكم بالدفعات المستحقة والمتأخرة.',
     done: () => T.invoiceId && invoiceStatus(find.invoice(T.invoiceId)) === 'paid' },
   { title: 'التسليم', route: () => `projects/${T.projectId}`, target: 'advance',
-    text: 'الفريق ركّب المطبخ. اضغط «تم التركيب: سلّم المشروع».',
-    why: 'المشروع يتقفل، ويظهر في تقرير الربحية بأرقامه النهائية.',
+    text: 'اكتمل التركيب. اضغط «تسليم المشروع».',
+    why: 'يُغلق المشروع ويظهر في تقرير الربحية بأرقامه النهائية.',
     done: () => find.project(T.projectId)?.stage >= DONE },
-  { title: 'خلصت الدورة كلها', route: () => 'dashboard',
-    text: 'من عميل جديد لحد مطبخ متسلّم ومتحصّل، وكل خطوة أثّرت في اللي بعدها من غير ما حد يكتب حاجة مرتين.',
-    why: 'جرّب كمان تغيّر الدور من تحت (المحاسب أو الفني) وشوف إن كل واحد شايف حاجات مختلفة. وفي الإعدادات هتلاقي «سجل التعديلات» فيه كل اللي عملته.', last: true },
+  { title: 'اكتملت الدورة', route: () => 'dashboard',
+    text: 'من عميل جديد حتى مشروع مُسلَّم ومُحصَّل، وكل خطوة انعكست على ما بعدها.',
+    why: 'يمكنك تغيير الدور من القائمة الجانبية لرؤية ما يظهر لكل مستخدم، وفي الإعدادات «سجل التعديلات» بكل ما تم.', last: true },
 ];
 
 function panel() {
@@ -79,9 +79,9 @@ function panel() {
       <button class="icon-btn" data-act="tourMin" aria-label="${T.min ? 'تكبير' : 'تصغير'}">${icon(T.min ? 'plus' : 'chevron', 16)}</button><button class="icon-btn" data-act="tourStop" aria-label="إنهاء الجولة" style="margin:0">${icon('x', 16)}</button></div>
     <div class="tour-prog"><span style="width:${((T.i + (ok ? 1 : 0)) / n) * 100}%"></span></div>
     <div class="tour-body"><h4>${esc(st.title)}</h4><p>${esc(st.text)}</p>${st.why ? `<div class="why">${esc(st.why)}</div>` : ''}
-      ${ok ? `<span class="done-step">${icon('check', 15)} تمام، خلصت الخطوة دي</span>` : ''}
+      ${ok ? `<span class="done-step">${icon('check', 15)} تم إنجاز هذه الخطوة</span>` : ''}
       <div class="row">
-        ${st.route && currentRoute() !== st.route() && !ok ? `<button class="btn sm primary" data-act="tourGo">${icon('next', 14)} وديني هناك</button>` : ''}
+        ${st.route && currentRoute() !== st.route() && !ok ? `<button class="btn sm primary" data-act="tourGo">${icon('next', 14)} الانتقال إلى الصفحة</button>` : ''}
         ${st.shortcut && !ok ? `<button class="btn sm" data-act="tourShortcut">${esc(st.shortcut.label)}</button>` : ''}
         <span class="spacer"></span>
         ${T.i > 0 ? `<button class="btn sm ghost" data-act="tourPrev">السابق</button>` : ''}
@@ -107,7 +107,7 @@ export const tour = {
     store.reset();
     T = { active: true, i: 0, min: false };
     store.session.role = 'admin'; store.save(); save();
-    toast('بدأنا الجولة على بيانات تجريبية نضيفة', 'gold');
+    toast('بدأت الجولة', 'gold');
     nav.go('dashboard');
   },
   stop() { T = { active: false }; save(); panel(); highlight(); },
@@ -125,9 +125,9 @@ export const tour = {
     tourGo() { const st = STEPS[T.i]; T.scrolled = false; save(); nav.go(st.route()); },
     tourNext() { if (T.i < STEPS.length - 1) { T.i += 1; T.scrolled = false; save(); const st = STEPS[T.i]; if (st.route && currentRoute() !== st.route()) nav.go(st.route()); else tour.sync(); } },
     tourPrev() { if (T.i > 0) { T.i -= 1; T.scrolled = false; save(); const st = STEPS[T.i]; nav.go(st.route()); } },
-    tourStop() { tour.stop(); toast('انتهت الجولة. النظام كله قدامك تجرّبه براحتك', 'gold'); },
+    tourStop() { tour.stop(); toast('انتهت الجولة', 'gold'); },
     tourMin() { T.min = !T.min; save(); panel(); },
-    tourShortcut() { const st = STEPS[T.i]; st.shortcut.run(); toast(`${find.project(T.projectId).name} وصل لمرحلة ${STAGES[DONE - 1].name}`); nav.render(); },
+    tourShortcut() { const st = STEPS[T.i]; st.shortcut.run(); toast(`انتقل ${find.project(T.projectId).name} إلى مرحلة ${STAGES[DONE - 1].name}`); nav.render(); },
   },
 };
 export const TOUR_STEPS = STEPS.length;
