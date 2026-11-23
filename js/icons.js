@@ -53,3 +53,15 @@ export function icon(name, size = 18, extra = '') {
   const d = P[name] || P.file;
   return `<svg class="ic ${extra}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 }
+
+let logoN = 0;
+export function logo(size = 52) {
+  const id = `vg${logoN++}`;
+  return `<svg class="logo-mark" width="${size}" height="${size}" viewBox="0 0 64 64" aria-hidden="true">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6c98a"/><stop offset=".55" stop-color="#c5a15a"/><stop offset="1" stop-color="#9c7a36"/></linearGradient></defs>
+  <rect x="1" y="1" width="62" height="62" fill="none" stroke="url(#${id})" stroke-width="1.4"/>
+  <rect x="5" y="5" width="54" height="54" fill="none" stroke="url(#${id})" stroke-width=".6" opacity=".55"/>
+  <path d="M10.5 14h14v1.6l-3 .5 12.2 29.4 12.1-29.4-3.3-.5V14h11.4v1.6l-2.4.6L35.3 52h-2.6L16.9 16.2l-2.4-.6H10.5z" fill="url(#${id})"/>
+  <path d="M28 57h8" stroke="url(#${id})" stroke-width="1"/>
+</svg>`;
+}

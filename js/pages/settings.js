@@ -1,5 +1,5 @@
 import { store, act, ROLES, NAV } from '../data.js';
-import { icon } from '../icons.js';
+import { icon, logo } from '../icons.js';
 import { esc, money, relDays, toast, confirmBox } from '../ui.js';
 import { nav } from '../nav.js';
 
@@ -9,7 +9,7 @@ export default {
   render() {
     const s = store.state;
     let body = '';
-    if (tab === 'company') body = `<div class="cols even"><div class="card card-pad"><div class="row" style="gap:14px;margin-bottom:14px"><div class="mark" style="background:var(--ink)">V</div><div><b style="font-size:16px">${esc(s.company.name)}</b><div class="muted">${esc(s.company.nameAr)}</div></div></div>
+    if (tab === 'company') body = `<div class="cols even"><div class="card card-pad"><div class="row" style="gap:14px;margin-bottom:14px"><div class="mark" style="background:var(--ink);padding:6px;border-radius:8px">${logo(44)}</div><div><b style="font-size:16px">${esc(s.company.name)}</b><div class="muted">${esc(s.company.nameAr)}</div></div></div>
         <dl class="kv"><dt>الدولة</dt><dd>${esc(s.company.country)}</dd><dt>العملة</dt><dd>دينار بحريني (BHD) · ٣ أرقام عشرية</dd><dt>الضريبة</dt><dd>غير مطبّقة (Without VAT)</dd><dt>اللغات</dt><dd>عربي / English</dd><dt>المستخدمين</dt><dd>${s.company.users} مستخدم</dd><dt>الاستضافة</dt><dd>سحابية (Cloud)</dd></dl></div>
       <form class="card card-pad stack" data-form="saveRates"><b>أسعار الساعة (بتدخل في تكلفة المشاريع)</b>
         <div class="grid2"><label class="f">ساعة العامل (د.ب)<input type="number" step="0.001" name="labor" value="${s.rates.labor}"></label><label class="f">ساعة الماكينة (د.ب)<input type="number" step="0.001" name="machine" value="${s.rates.machine}"></label></div>
