@@ -4,7 +4,7 @@
 // DEMO.rolePicker / DEMO.tour: role selection on the login screen and the guided tour.
 // In the real system each action below becomes a REST API call to the Node.js server.
 
-const KEY = 'venice-erp-demo-v1';
+const KEY = 'venice-erp-demo-v2';
 
 export const DEMO = {
   locked: [],
