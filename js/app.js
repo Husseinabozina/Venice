@@ -1,5 +1,5 @@
 import { store, ROLES, NAV, DEMO, find, lowStock, isLate, balanceOf, quoteTotal, nextDue, today } from './data.js';
-import { icon, logo } from './icons.js';
+import { icon, logo, kitchenArt } from './icons.js';
 import { esc, toast, closeModal } from './ui.js';
 import { pages, handlers } from './pages/index.js';
 import { tour, TOUR_STEPS } from './tour.js';
@@ -56,32 +56,6 @@ function loginView() {
   </div>`;
 }
 
-function kitchenArt() {
-  const L = (x1, y1, x2, y2, c = '') => `<line class="d ${c}" pathLength="1" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
-  const R = (x, y, w, h, c = '') => `<rect class="d ${c}" pathLength="1" x="${x}" y="${y}" width="${w}" height="${h}"/>`;
-  let s = '';
-  // upper cabinets
-  [[20, 120], [140, 120], [380, 120], [500, 120]].forEach(([x, w]) => { s += R(x, 10, w, 100); s += R(x + 8, 18, w - 16, 84, 'f'); s += L(x + w / 2 - 14, 92, x + w / 2 + 14, 92, 'h'); });
-  // hood
-  s += `<polygon class="d" pathLength="1" points="298,10 342,10 342,62 378,92 262,92 298,62"/>` + L(262, 98, 378, 98, 'f');
-  // backsplash tiles
-  for (let x = 40; x < 620; x += 40) s += L(x, 116, x, 164, 'g');
-  s += L(20, 140, 620, 140, 'g');
-  // counter
-  s += R(10, 166, 620, 10);
-  // base cabinets
-  s += R(20, 176, 120, 104); [210, 244].forEach((y) => (s += L(20, y, 140, y, 'f'))); [193, 227, 262].forEach((y) => (s += L(66, y, 94, y, 'h')));
-  s += R(140, 176, 120, 104); s += L(200, 176, 200, 280, 'f'); s += L(190, 196, 190, 226, 'h') + L(210, 196, 210, 226, 'h');
-  s += R(260, 176, 120, 104); s += R(276, 206, 88, 62, 'f'); s += R(290, 218, 60, 38, 'g'); s += L(290, 196, 350, 196, 'h');
-  [292, 310, 328, 346].forEach((x) => (s += `<circle class="d f" pathLength="1" cx="${x}" cy="186" r="3.5"/>`));
-  s += R(380, 176, 120, 104); s += L(440, 176, 440, 280, 'f'); s += L(430, 196, 430, 226, 'h') + L(450, 196, 450, 226, 'h');
-  s += R(500, 176, 120, 104); [228].forEach((y) => (s += L(500, y, 620, y, 'f'))); [200, 252].forEach((y) => (s += L(546, y, 574, y, 'h')));
-  s += L(20, 288, 620, 288, 'f');
-  // dimensions
-  s += L(20, 306, 290, 306, 'm') + L(350, 306, 620, 306, 'm') + L(20, 299, 20, 313, 'm') + L(620, 299, 620, 313, 'm');
-  s += L(636, 10, 636, 120, 'm') + L(636, 170, 636, 288, 'm') + L(629, 10, 643, 10, 'm') + L(629, 288, 643, 288, 'm');
-  return `<svg viewBox="0 0 660 320" preserveAspectRatio="xMidYMid meet">${s}<text x="320" y="310" text-anchor="middle">3600</text><text x="636" y="150" text-anchor="middle" transform="rotate(-90 636 150)">2400</text></svg>`;
-}
 
 // ---------- shell ----------
 function counts() {
@@ -117,6 +91,7 @@ function shellView(content, page) {
         <button class="icon-btn menu-btn" data-act="toggleSide" aria-label="القائمة">${icon('menu', 20)}</button>
         <div class="search">${icon('search', 17)}<input id="gsearch" placeholder="بحث عن عميل أو رقم هاتف أو مشروع أو فاتورة…" autocomplete="off" aria-label="بحث"><kbd>Ctrl K</kbd><div class="search-results" hidden></div></div>
         <span class="spacer"></span>
+        <div class="lang" role="group" aria-label="اللغة"><button class="on" type="button" aria-pressed="true">ع</button><button type="button" data-act="langEn" aria-pressed="false">EN</button></div>
         <button class="icon-btn" data-act="notifications" aria-label="التنبيهات">${icon('bell', 20)}${c.sales + c.production + c.inventory ? '<span class="dot"></span>' : ''}</button>
       </header>
       <main class="page" id="page">${content}</main>
@@ -171,6 +146,7 @@ const coreHandlers = {
   logout() { store.session.role = null; store.save(); tour.stop(); location.hash = ''; render(); },
   toggleSide() { sideOpen = !sideOpen; document.querySelector('.side')?.classList.toggle('open', sideOpen); },
   startTour() { if (DEMO.tour) tour.start(); },
+  langEn() { toast('الواجهة الإنجليزية ستتوفر في المرحلة القادمة', 'gold'); },
   notifications() { go('dashboard'); setTimeout(() => document.getElementById('attention')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); },
 };
 const coreForms = {

@@ -31,17 +31,17 @@ export default {
     const receivable = s.invoices.reduce((a, i) => a + balanceOf(i), 0);
     const overdue = s.invoices.filter((i) => { const d = nextDue(i); return d && d.due < today(); }).length;
     const low = lowStock().length;
-    const activeProfit = active.reduce((a, p) => a + projectCost(p).profit, 0);
+    const activeValue = active.reduce((a, p) => a + p.value, 0);
     let kpis = '';
     if (role === 'admin') kpis = kpi('مستحقات العملاء', money(receivable), 'wallet', 'statements', overdue ? chip('late', `${overdue} متأخرة`) : chip('paid', 'لا توجد متأخرات'))
       + kpi('مشاريع في الورشة', active.length, 'factory', 'production', chip('neutral', `${active.filter(isLate).length} متأخر`))
-      + kpi('الربح المتوقع للمشاريع الجارية', money(activeProfit), 'coins', 'costing', chip('gold', 'وفق التكلفة الفعلية'), true)
+      + kpi('قيمة المشاريع الجارية', money(activeValue), 'coins', 'projects', chip('neutral', `${active.length} مشاريع`), true)
       + kpi('خامات تحت حد الطلب', low, 'box', 'inventory', low ? chip('low', 'تحتاج إلى طلب') : chip('okstock'));
     else if (role === 'accountant') {
       const month = today().slice(0, 7);
       const collected = s.receipts.filter((x) => x.date.startsWith(month)).reduce((a, x) => a + x.amount, 0);
       const due7 = s.invoices.map(nextDue).filter((d) => d && d.due <= daysFrom(7)).reduce((a, d) => a + d.amount, 0);
-      kpis = kpi('مستحقات العملاء', money(receivable), 'wallet', 'statements') + kpi('مستحق خلال ٧ أيام', money(due7), 'clock', 'sales') + kpi('المحصّل هذا الشهر', money(collected), 'check', 'sales', '', true) + kpi('أوامر شراء مفتوحة', s.pos.filter((p) => p.status !== 'received').length, 'cart', 'purchases');
+      kpis = kpi('مستحقات العملاء', money(receivable), 'wallet', 'statements') + kpi('مستحق خلال 7 أيام', money(due7), 'clock', 'sales') + kpi('المحصّل هذا الشهر', money(collected), 'check', 'sales', '', true) + kpi('أوامر شراء مفتوحة', s.pos.filter((p) => p.status !== 'received').length, 'cart', 'purchases');
     } else if (role === 'sales') {
       const open = s.quotes.filter((q) => ['draft', 'sent'].includes(q.status));
       kpis = kpi('عروض بانتظار الرد', s.quotes.filter((q) => q.status === 'sent').length, 'send', 'sales') + kpi('قيمة العروض المفتوحة', money(open.reduce((a, q) => a + quoteTotal(q), 0)), 'receipt', 'sales', '', true) + kpi('العملاء', s.customers.length, 'users', 'customers') + kpi('المشاريع الجارية', active.length, 'folder', 'projects');
@@ -70,7 +70,7 @@ export default {
       </div>
       <div class="stack">
         ${store.can('production') || store.can('projects') ? `<div class="card"><div class="card-head"><h3>الورشة الآن</h3><a class="btn sm ghost" href="#/production">لوحة الإنتاج ${icon('chevron', 14)}</a></div>
-          <div class="card-pad hbars">${stageCounts.map((x) => `<div class="r"><span>${x.name}</span><div class="bar"><span style="width:${(x.n / maxN) * 100}%"></span></div><span class="num muted">${x.n} مشروع</span></div>`).join('')}</div></div>` : ''}
+          <div class="card-pad hbars">${stageCounts.map((x) => `<div class="r"><span>${x.name}</span><div class="bar"><span style="width:${(x.n / maxN) * 100}%"></span></div><span class="num muted" style="white-space:nowrap">${x.n} مشروع</span></div>`).join('')}</div></div>` : ''}
         <div class="card"><div class="card-head"><h3>آخر النشاطات</h3></div>
           <div class="act">${s.activity.slice(0, 6).map((a) => `<div class="a"><span class="avatar">${esc(a.user.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><div>${esc(a.text)}</div><div class="s">${esc(a.user)} · ${esc(a.ts.slice(11))} · ${relDays(a.ts)}</div></div></div>`).join('')}</div></div>
       </div>

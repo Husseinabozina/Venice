@@ -67,11 +67,11 @@ export const daysFrom = (n) => { const d = new Date(); d.setDate(d.getDate() + n
 function seed() {
   const D = daysFrom;
   const customers = [
-    { id: 'CUS-001', name: 'أحمد محمد', type: 'فرد', phone: '+973 3333 1111', email: 'ahmed@example.com', city: 'المنامة', address: 'طريق 2805، المنامة', parentId: null, since: D(-120) },
-    { id: 'CUS-002', name: 'ABC Contracting', type: 'شركة', phone: '+973 1717 2222', email: 'info@abc.example', city: 'المحرق', address: 'المحرق، البحرين', parentId: null, since: D(-300) },
-    { id: 'CUS-003', name: 'علي حسن', type: 'فرد', phone: '+973 3999 5555', email: 'ali@example.com', city: 'الرفاع', address: 'الرفاع الشرقي', parentId: null, since: D(-60) },
-    { id: 'CUS-004', name: 'سارة عبدالله', type: 'فرد', phone: '+973 3666 4444', email: 'sara@example.com', city: 'المحرق', address: 'مشروع فلل المحرق - فيلا 3', parentId: 'CUS-002', since: D(-40) },
-    { id: 'CUS-005', name: 'خالد يوسف', type: 'فرد', phone: '+973 3888 7777', email: 'khaled@example.com', city: 'سترة', address: 'مشروع فلل سترة - فيلا 7', parentId: 'CUS-002', since: D(-35) },
+    { id: 'CUS-001', name: 'أحمد محمد', type: 'فرد', phone: '+973 3333 1111', email: 'ahmed.mohamed@gmail.com', city: 'المنامة', address: 'طريق 2805، المنامة', parentId: null, since: D(-120) },
+    { id: 'CUS-002', name: 'ABC Contracting', type: 'شركة', phone: '+973 1717 2222', email: 'info@abccontracting.com.bh', city: 'المحرق', address: 'المحرق، البحرين', parentId: null, since: D(-300) },
+    { id: 'CUS-003', name: 'علي حسن', type: 'فرد', phone: '+973 3999 5555', email: 'ali.hasan@gmail.com', city: 'الرفاع', address: 'الرفاع الشرقي', parentId: null, since: D(-60) },
+    { id: 'CUS-004', name: 'سارة عبدالله', type: 'فرد', phone: '+973 3666 4444', email: 'sara.abdulla@gmail.com', city: 'المحرق', address: 'مشروع فلل المحرق - فيلا 3', parentId: 'CUS-002', since: D(-40) },
+    { id: 'CUS-005', name: 'خالد يوسف', type: 'فرد', phone: '+973 3888 7777', email: 'khalid.yousif@gmail.com', city: 'سترة', address: 'مشروع فلل سترة - فيلا 7', parentId: 'CUS-002', since: D(-35) },
   ];
   const materials = [
     { id: 'MAT-001', name: 'MDF 18 مم', unit: 'لوح', qty: 28, min: 30, cost: 12 },

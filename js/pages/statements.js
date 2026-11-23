@@ -1,5 +1,5 @@
 import { store, find, childrenOf, today } from '../data.js';
-import { icon } from '../icons.js';
+import { icon, logo } from '../icons.js';
 import { esc, money, fmtDate } from '../ui.js';
 import { printDoc } from '../docs.js';
 import { nav } from '../nav.js';
@@ -22,7 +22,7 @@ function compute(cid) {
 }
 
 function statementDoc(d) {
-  return `<div class="doc"><div class="doc-head"><div style="display:flex;align-items:center;gap:13px"><div class="mk">V</div><div><div class="nm">VENICE</div><div class="tg">FURNITURE AND WORKSHOP W.L.L</div></div></div>
+  return `<div class="doc"><div class="doc-head"><div style="display:flex;align-items:center;gap:13px"><div class="mk">${logo(54)}</div><div><div class="nm">VENICE</div><div class="tg">FURNITURE WORKSHOP W.L.L</div></div></div>
     <div class="ttl"><b>CUSTOMER STATEMENT</b><div>${opts.from || 'All dates'} — ${opts.to || today()}</div></div></div><div class="doc-stripe"></div>
   <div class="doc-body"><div><b style="font-size:18px">${esc(d.c.name)}</b><div>${esc(d.c.phone)} · ${esc(d.c.email || '')}</div></div>
     <div style="background:#f7f3ea;padding:12px">Opening balance: <b>${m3(d.opening)} BHD</b></div>

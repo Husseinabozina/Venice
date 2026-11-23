@@ -14,7 +14,7 @@ function tableHtml() {
   const rows = listRows();
   if (!rows.length) return emptyState('search', 'لا يوجد عميل مطابق', 'جرّب البحث بجزء من الاسم أو برقم الهاتف.');
   return `<div class="table-wrap"><table><thead><tr><th>العميل</th><th>الهاتف</th><th>المدينة</th><th>المشاريع</th><th class="num">الرصيد المستحق</th></tr></thead><tbody>
-    ${rows.map((c) => { const bal = customerBalance(c.id); const parent = c.parentId && find.customer(c.parentId); const kids = childrenOf(c.id).length; const pc = store.state.projects.filter((p) => p.customerId === c.id).length;
+    ${rows.map((c) => { const parent = c.parentId && find.customer(c.parentId); const kidList = childrenOf(c.id); const kids = kidList.length; const ids = [c.id, ...kidList.map((k) => k.id)]; const bal = ids.reduce((a, id) => a + customerBalance(id), 0); const pc = store.state.projects.filter((p) => ids.includes(p.customerId)).length;
       return `<tr class="click" data-href="customers/${c.id}"><td><div class="row" style="gap:10px;flex-wrap:nowrap"><span class="avatar">${initials(c.name)}</span><span><b>${esc(c.name)}</b><span class="sub">${c.id} · ${c.type}${parent ? ` · تابع لـ ${esc(parent.name)}` : ''}${kids ? ` · ${kids} عملاء تابعون` : ''}</span></span></div></td>
       <td><span class="ltr">${esc(c.phone)}</span></td><td>${esc(c.city)}</td><td>${pc}</td><td class="num">${bal ? money(bal) : '<span class="muted">—</span>'}</td></tr>`; }).join('')}
   </tbody></table></div>`;
@@ -23,7 +23,7 @@ function tableHtml() {
 function customerForm(defaults = {}) {
   const companies = store.state.customers.filter((c) => c.type === 'شركة');
   return `<form class="stack" data-form="saveCustomer">
-    <div class="row between"><span class="small muted">الاسم ورقم الهاتف حقلان إلزاميان</span><button type="button" class="autofill" data-act="autofillCustomer">${icon('spark', 14)} تعبئة بيانات تجريبية</button></div>
+    <div class="row between"><span class="small muted">الاسم ورقم الهاتف حقلان إلزاميان</span><button type="button" class="autofill" data-act="autofillCustomer">${icon('spark', 14)} تعبئة تلقائية</button></div>
     <div class="grid2"><label class="f">اسم العميل<input name="name" required value="${esc(defaults.name || '')}"></label>
     <label class="f">رقم الهاتف<input name="phone" required dir="ltr" placeholder="+973" value="${esc(defaults.phone || '')}"></label></div>
     <div class="grid2"><label class="f">النوع<select name="type"><option>فرد</option><option>شركة</option></select></label>
@@ -54,7 +54,7 @@ function profile(id) {
     <a href="#/projects"><b>${projects.length}</b><span>مشاريع</span></a>
     <a href="#/sales"><b>${quotes.length}</b><span>عروض أسعار</span></a>
     <a href="#/sales"><b>${invoices.length}</b><span>فواتير</span></a>
-    <a href="#/statements/${c.id}"><b class="num">${money(bal)}</b><span>الرصيد المستحق</span></a>
+    <a href="${store.can('statements') ? `#/statements/${c.id}` : '#/sales'}"><b class="num">${money(bal)}</b><span>الرصيد المستحق</span></a>
   </div>
   <div class="cols">
     <div class="stack">
@@ -77,11 +77,11 @@ export default {
   render(id) {
     if (id && id !== 'new') return profile(id);
     const s = store.state;
-    return `<div class="page-head"><div><h1>العملاء</h1><p>${s.customers.length} عميل</p></div>
+    return `<div class="page-head"><div><h1>العملاء</h1><p>${s.customers.length} ${s.customers.length >= 3 && s.customers.length <= 10 ? 'عملاء' : 'عميلًا'}</p></div>
       <button class="btn primary" data-act="newCustomer" data-tour="new-customer">${icon('plus', 16)} عميل جديد</button></div>
     <div class="card"><div class="card-head" style="flex-wrap:wrap">
       <div class="tabs">${[['all', 'الكل'], ['فرد', 'أفراد'], ['شركة', 'شركات']].map(([k, l]) => `<button data-act="custType" data-v="${k}" class="${filter.type === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="search" style="max-width:300px"><span style="position:absolute;right:12px;top:11px;color:var(--muted)">${icon('search', 16)}</span><input data-input="custSearch" placeholder="الاسم أو رقم الهاتف…" value="${esc(filter.q)}" style="padding-inline-start:36px"></div>
+      <div class="search" style="max-width:300px">${icon('search', 16)}<input data-input="custSearch" placeholder="الاسم أو رقم الهاتف…" value="${esc(filter.q)}" style="padding-inline-start:36px"></div>
     </div><div id="cust-table">${tableHtml()}</div></div>`;
   },
   mount(root, id) { if (id === 'new') openNewCustomer(); },
@@ -93,7 +93,7 @@ export const handlers = {
   custType(el) { filter.type = el.dataset.v; nav.render(); },
   custSearch(el) { filter.q = el.value; document.getElementById('cust-table').innerHTML = tableHtml(); },
   autofillCustomer(el) {
-    const f = el.closest('form'); const v = { name: 'منى حسين', phone: '+973 3555 2020', city: 'الجفير', address: 'فيلا 12، الجفير', email: 'mona@example.com' };
+    const f = el.closest('form'); const v = { name: 'منى حسين', phone: '+973 3555 2020', city: 'الجفير', address: 'فيلا 12، الجفير', email: 'mona.hussain@gmail.com' };
     Object.entries(v).forEach(([k, val]) => { f.elements[k].value = val; });
     f.elements.type.value = 'فرد';
   },

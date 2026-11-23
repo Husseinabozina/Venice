@@ -1,12 +1,13 @@
 // Branded printable documents (quotation, invoice, receipt) + print helper.
 import { store, find, quoteTotal, paidOf, balanceOf } from './data.js';
 import { esc } from './ui.js';
+import { logo } from './icons.js';
 
 const m3 = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 
 function head(title, id, date) {
   return `<div class="doc-head">
-    <div style="display:flex;align-items:center;gap:13px"><div class="mk">V</div><div><div class="nm">VENICE</div><div class="tg">FURNITURE AND WORKSHOP W.L.L</div></div></div>
+    <div style="display:flex;align-items:center;gap:13px"><div class="mk">${logo(54)}</div><div><div class="nm">VENICE</div><div class="tg">FURNITURE WORKSHOP W.L.L</div></div></div>
     <div class="ttl"><b>${title}</b><div>${esc(id)}</div><div>${esc(date)}</div></div>
   </div><div class="doc-stripe"></div>`;
 }
@@ -32,7 +33,7 @@ export function quoteDoc(q) {
     </div>
     <div class="doc-terms"><b>Payment Terms / شروط الدفع</b>
       <div>50% advance upon order confirmation; remaining 50% payable one day before the scheduled installation.</div>
-      <div dir="rtl">٥٠٪ مقدمًا عند تأكيد الطلب، و٥٠٪ المتبقية قبل موعد التركيب بيوم واحد.</div>
+      <div dir="rtl">50% مقدّمًا عند تأكيد الطلب، و50% المتبقية قبل موعد التركيب بيوم واحد.</div>
       <b style="display:block;margin-top:10px">الشروط والأحكام</b>
       <ol dir="rtl" style="margin:6px 0;padding-right:18px">${terms.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
     </div>
@@ -55,7 +56,7 @@ export function invoiceDoc(inv) {
     <table style="margin-top:8px"><thead><tr><th>Payment</th><th>Due</th><th style="text-align:right">Amount (BHD)</th></tr></thead><tbody>
       ${inv.schedule.map((s, i) => `<tr><td>${i === 0 ? 'First payment (advance)' : 'Second payment (before installation)'}</td><td>${esc(s.due)}</td><td class="r">${m3(s.amount)}</td></tr>`).join('')}
     </tbody></table></div>
-  </div>${foot('VENICE FURNITURE AND WORKSHOP W.L.L · Kingdom of Bahrain')}</div>`;
+  </div>${foot('VENICE FURNITURE WORKSHOP W.L.L · Kingdom of Bahrain')}</div>`;
 }
 
 export function receiptDoc(r) {

@@ -1,5 +1,5 @@
-import { store, act, find, STAGES, DONE, projectCost, isLate, invoiceStatus, balanceOf, paidOf } from '../data.js';
-import { icon } from '../icons.js';
+import { store, act, find, STAGES, DONE, ROLES, projectCost, isLate, invoiceStatus, balanceOf, paidOf } from '../data.js';
+import { icon, kitchenArt } from '../icons.js';
 import { esc, money, fmtDate, relDays, chip, toast, modal, closeModal, formData, emptyState, pct, dayCount } from '../ui.js';
 import { openIssue } from './inventory.js';
 import { nav } from '../nav.js';
@@ -23,11 +23,20 @@ function list() {
   </tbody></table></div>` : emptyState('folder', 'لا توجد مشاريع', tab === 'late' ? 'لا توجد مشاريع متأخرة.' : '')}</div>`;
 }
 
+function projectLog(p, inv) {
+  const out = store.state.activity.filter((a) => a.ref.includes(p.id)).map((a) => ({ ...a }));
+  const has = (t) => out.some((a) => a.text.includes(t));
+  const pm = ROLES.find((r) => r.key === 'production')?.person || '—';
+  p.stages.forEach((st, i) => { if (st?.start && i < DONE && !has(STAGES[i].name)) out.push({ text: `بدء مرحلة ${STAGES[i].name}`, user: i === DONE - 1 ? (p.assignee || pm) : pm, ts: st.start }); });
+  if (inv && !has(inv.id)) out.push({ text: `إصدار الفاتورة ${inv.id}`, user: 'ريم يوسف', ts: inv.date });
+  if (inv) store.state.receipts.filter((r) => r.invoiceId === inv.id && !has(r.id)).forEach((r) => out.push({ text: `استلام دفعة ${money(r.amount)} · سند ${r.id}`, user: 'ريم يوسف', ts: r.date }));
+  return out.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
+}
 function detail(p) {
   const c = find.customer(p.customerId); const cost = projectCost(p);
   const inv = store.state.invoices.find((i) => i.projectId === p.id);
   const moves = store.state.movements.filter((m) => m.projectId === p.id);
-  const acts = store.state.activity.filter((a) => a.ref.includes(p.id));
+  const acts = projectLog(p, inv);
   const next = p.stage < DONE ? (p.stage + 1 < DONE ? STAGES[p.stage + 1].name : 'تم التسليم') : null;
   const daysIn = p.stages[p.stage]?.start ? Math.max(0, Math.round((new Date() - new Date(p.stages[p.stage].start)) / 864e5)) : 0;
   const canMove = store.can('production');
@@ -42,17 +51,17 @@ function detail(p) {
     <div class="stack">
       <div class="card card-pad"><dl class="kv"><dt>الموقع</dt><dd>${esc(p.location || '—')}</dd><dt>المقاسات</dt><dd>${esc(p.dimensions || '—')}</dd><dt>الخامات</dt><dd>${esc(p.materials || '—')}</dd><dt>المسؤول</dt><dd>${esc(p.assignee || '—')}</dd><dt>التسليم المتوقع</dt><dd>${fmtDate(p.expected)} ${p.stage < DONE ? `<span class="muted small">(${relDays(p.expected)})</span>` : ''}</dd><dt>ملاحظات</dt><dd>${esc(p.notes || '—')}</dd></dl></div>
       <div class="card"><div class="card-head"><h3>الرسومات والمرفقات</h3><span class="chip neutral">${p.files.length}</span></div><div class="card-pad files">
-        ${p.files.map((f) => `<div class="file">${icon('file', 18)}<span style="flex:1">${esc(f.name)}</span><span class="small muted">${esc(f.size)}</span><button class="btn sm ghost" data-act="fakeOpen" data-name="${esc(f.name)}">${/\.(pdf|jpg|png)$/i.test(f.name) ? 'معاينة' : 'تنزيل'}</button></div>`).join('')}
-        <label class="drop">${icon('upload', 20)}<div>اسحب الملف هنا أو انقر للرفع</div><div class="small">PDF، صور، SketchUp، CAD</div><input type="file" hidden data-change="uploadFile" data-id="${p.id}" accept=".pdf,.jpg,.jpeg,.png,.skp,.dwg,.dxf"></label></div></div>
+        ${p.files.map((f) => `<div class="file">${icon('file', 18)}<span style="flex:1">${esc(f.name)}</span><span class="small muted ltr">${esc(f.size)}</span><button class="btn sm ghost" data-act="fakeOpen" data-id="${p.id}" data-name="${esc(f.name)}">${icon('eye', 15)} معاينة</button></div>`).join('')}
+        <label class="drop">${icon('upload', 20)}<div>اسحب الملف هنا أو انقر للرفع</div><div class="small ltr">PDF · JPG · PNG · SKP · DWG</div><input type="file" hidden data-change="uploadFile" data-id="${p.id}" accept=".pdf,.jpg,.jpeg,.png,.skp,.dwg,.dxf"></label></div></div>
       <div class="card"><div class="card-head"><h3>الخامات المصروفة</h3><span class="num">${money(cost.mat)}</span></div>
         ${moves.length ? `<div class="table-wrap"><table><tbody>${moves.map((m) => { const mt = find.material(m.materialId); return `<tr><td>${esc(mt.name)}</td><td class="num">${m.qty} ${mt.unit}</td><td>${fmtDate(m.date)}<span class="sub">${esc(m.by || '')}</span></td><td class="num">${money(m.qty * mt.cost)}</td></tr>`; }).join('')}</tbody></table></div>` : '<div class="empty"><p>لم تُصرف خامات بعد.</p></div>'}</div>
     </div>
     <div class="stack">
       <div class="card"><div class="card-head"><h3>الربحية</h3>${store.can('costing') ? `<a class="btn sm ghost" href="#/costing/${p.id}">التفاصيل ${icon('chevron', 14)}</a>` : ''}</div><div class="card-pad stack">
         <div class="row between"><span class="muted">سعر البيع</span><b class="num">${money(p.value)}</b></div>
-        <div class="row between"><span class="muted">التكلفة الفعلية</span><b class="num">${money(cost.total)}</b></div>
-        <div class="row between" style="border-top:1px solid var(--line);padding-top:10px"><span>الربح</span><b class="num" style="font-size:18px;color:${cost.profit >= 0 ? 'var(--ok)' : 'var(--bad)'}">${money(cost.profit)}</b></div>
-        <div class="bar"><span style="width:${Math.max(0, Math.min(100, cost.margin * 100))}%"></span></div><div class="small muted">هامش الربح ${pct(cost.margin)}</div></div></div>
+        <div class="row between"><span class="muted">التكلفة حتى الآن</span><b class="num">${money(cost.total)}</b></div>
+        <div class="row between" style="border-top:1px solid var(--line);padding-top:10px"><span>الربح الحالي</span><b class="num" style="font-size:18px;color:${cost.profit >= 0 ? 'var(--ok)' : 'var(--bad)'}">${money(cost.profit)}</b></div>
+        <div class="bar"><span style="width:${Math.max(0, Math.min(100, cost.margin * 100))}%"></span></div><div class="small muted">الهامش الحالي ${pct(cost.margin)}</div></div></div>
       ${inv ? `<div class="card"><div class="card-head"><h3>الوضع المالي</h3>${chip(invoiceStatus(inv))}</div><div class="card-pad stack"><div class="row between"><span class="muted">الفاتورة</span><a href="#/sales/${inv.id}">${inv.id}</a></div><div class="row between"><span class="muted">المدفوع</span><b class="num">${money(paidOf(inv))}</b></div><div class="row between"><span class="muted">المتبقي</span><b class="num">${money(balanceOf(inv))}</b></div></div></div>` : ''}
       <div class="card"><div class="card-head"><h3>مراحل المشروع</h3></div><div class="act">${STAGES.map((s, i) => { const st = p.stages[i]; return `<div class="a"><span class="ico ${i < p.stage ? 'ok' : i === p.stage && p.stage < DONE ? 'gold' : ''}" style="width:30px;height:30px;border-radius:50%;${i > p.stage || p.stage === DONE && i === p.stage ? 'background:#efebe3;color:#aaa' : ''}">${i < p.stage ? icon('check', 14) : i + 1}</span><div><div>${s.name}</div><div class="s">${st?.start ? `بدأت ${fmtDate(st.start)}` : 'لم تبدأ'}${st?.end ? ` · انتهت ${fmtDate(st.end)}` : ''}</div></div></div>`; }).join('')}</div></div>
       <div class="card"><div class="card-head"><h3>سجل المشروع</h3></div><div class="act">${acts.length ? acts.slice(0, 8).map((a) => `<div class="a"><span class="avatar">${esc(a.user.split(' ').map((w) => w[0]).join('').slice(0, 2))}</span><div><div>${esc(a.text)}</div><div class="s">${esc(a.user)} · ${relDays(a.ts)}</div></div></div>`).join('') : '<div class="empty"><p>لا توجد تحركات.</p></div>'}</div></div>
@@ -72,7 +81,11 @@ export const handlers = {
   advance(el) { const p = act.moveStage(el.dataset.id, 1); toast(p.stage >= DONE ? `تم تسليم ${p.name}` : `انتقل ${p.name} إلى مرحلة ${STAGES[p.stage].name}`); nav.render(); },
   back(el) { const p = act.moveStage(el.dataset.id, -1); toast(`أُعيد ${p.name} إلى مرحلة ${STAGES[p.stage].name}`, 'gold'); nav.render(); },
   issueForProject(el) { openIssue(el.dataset.id); },
-  fakeOpen(el) { toast(`جارٍ فتح «${el.dataset.name}»`, 'gold'); },
+  fakeOpen(el) {
+    const p = find.project(el.dataset.id); const f = p.files.find((x) => x.name === el.dataset.name) || { name: el.dataset.name, size: '' };
+    modal(f.name, `<div class="plan">${kitchenArt()}<div class="plan-tb"><div><span>PROJECT</span><b>${esc(p.name)}</b></div><div><span>NO.</span><b>${p.id}</b></div><div><span>SCALE</span><b>1:25</b></div><div><span>FILE</span><b>${esc(f.name)}</b></div></div></div>
+      <div class="row between" style="margin-top:14px"><span class="small muted"><span class="ltr">${esc(f.size || '')}</span></span><button type="button" class="btn ghost" data-act="closeModal">إغلاق</button></div>`, { wide: true });
+  },
   uploadFile(el) { const f = el.files[0]; if (!f) return; act.addFile(el.dataset.id, f.name); toast(`تم رفع ${f.name}`); nav.render(); },
   editProject(el) {
     const p = find.project(el.dataset.id);

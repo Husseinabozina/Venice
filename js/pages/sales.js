@@ -19,7 +19,7 @@ function quoteStage(q) {
   const inv = store.state.invoices.find((i) => i.quoteId === q.id);
   if (!inv) return 2;
   const st = invoiceStatus(inv);
-  return st === 'paid' ? 5 : st === 'partial' ? 4 : 3;
+  return st === 'paid' ? 6 : st === 'partial' ? 4 : 3;
 }
 const FLOW = ['مسودة', 'أُرسل للعميل', 'موافقة العميل', 'فاتورة', 'سداد المقدّم', 'السداد الكامل'];
 
@@ -50,7 +50,7 @@ function quoteForm(custId) {
   if (!draft || draft.forCustomer !== (custId || null)) draft = { forCustomer: custId || null, customerId: custId || '', title: '', type: 'مطبخ', validDays: 15, notes: '', items: [{ desc: '', qty: 1, price: 0 }] };
   return `<div class="crumb"><a href="#/sales">عروض الأسعار والفواتير</a>${icon('chevron', 13)}<span>عرض سعر جديد</span></div>
   <div class="page-head"><div><h1>عرض سعر جديد</h1></div>
-    <button type="button" class="autofill" data-act="autofillQuote" data-tour="autofill-quote">${icon('spark', 14)} تعبئة بيانات تجريبية</button></div>
+    <button type="button" class="autofill" data-act="autofillQuote" data-tour="autofill-quote">${icon('spark', 14)} تعبئة تلقائية</button></div>
   <form class="cols" data-form="saveQuote" id="qform">
     <div class="card card-pad stack">
       <div class="grid2"><label class="f">العميل<select name="customerId" required data-change="draftField"><option value="">اختر العميل…</option>${s.customers.map((c) => `<option value="${c.id}" ${draft.customerId === c.id ? 'selected' : ''}>${esc(c.name)} · ${c.phone}</option>`).join('')}</select></label>
@@ -66,7 +66,7 @@ function quoteForm(custId) {
         <div class="row"><span class="muted">المجموع</span><b class="num" id="qsub">${money(draftTotal())}</b></div>
         <div class="row"><span class="muted">ضريبة القيمة المضافة</span><span class="muted">غير مطبّقة</span></div>
         <div class="row grand"><span>الإجمالي</span><span class="num" id="qtotal">${money(draftTotal())}</span></div>
-        <div class="row small muted"><span>المقدم المطلوب (٥٠٪)</span><span class="num" id="qdep">${money(draftTotal() / 2)}</span></div></div>
+        <div class="row small muted"><span>المقدّم المطلوب (50%)</span><span class="num" id="qdep">${money(draftTotal() / 2)}</span></div></div>
         <button class="btn primary" name="mode" value="send" data-tour="save-quote">${icon('send', 16)} حفظ وإرسال للعميل</button>
         <button class="btn" name="mode" value="draft">${icon('file', 16)} حفظ كمسودة</button>
       </div>
@@ -125,10 +125,10 @@ function invoiceView(inv) {
   <div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kcard"><div class="l">${icon('receipt', 17)}إجمالي الفاتورة</div><div class="v num">${money(inv.total)}</div></div>
     <div class="kcard"><div class="l">${icon('check', 17)}المدفوع</div><div class="v num" style="color:var(--ok)">${money(paid)}</div></div>
     <div class="kcard"><div class="l">${icon('wallet', 17)}المتبقي</div><div class="v num gold">${money(bal)}</div></div></div>
-  <div class="cols">
-    <div class="stack"><div class="card"><div class="card-head"><h3>جدول الدفعات</h3><span class="small muted">٥٠٪ مقدّمًا · ٥٠٪ قبل التركيب بيوم واحد</span></div><div class="table-wrap"><table><thead><tr><th>الدفعة</th><th>الاستحقاق</th><th class="num">المبلغ</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>
+  <div class="stack">
+    <div class="stack"><div class="card"><div class="card-head"><h3>جدول الدفعات</h3><span class="small muted">50% مقدّمًا · 50% قبل التركيب بيوم واحد</span></div><div class="table-wrap"><table><thead><tr><th>الدفعة</th><th>الاستحقاق</th><th class="num">المبلغ</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>
       <div class="card"><div class="card-head"><h3>سندات القبض</h3></div>${recs.length ? `<div class="table-wrap"><table><tbody>${recs.map((r) => `<tr><td><b>${r.id}</b><span class="sub">${r.installment ? 'الدفعة الثانية' : 'الدفعة الأولى'}</span></td><td>${fmtDate(r.date)}</td><td>${esc(r.method)}</td><td class="num">${money(r.amount)}</td><td><button class="btn sm" data-act="showReceipt" data-id="${r.id}">${icon('eye', 14)} عرض</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty"><p>لا توجد دفعات مسجلة.</p></div>'}</div></div>
-    <div>${invoiceDoc(inv)}</div>
+    <div class="doc-wrap">${invoiceDoc(inv)}</div>
   </div>`;
 }
 
@@ -146,7 +146,7 @@ function openReceipt(invId) {
 }
 function showReceipt(id) {
   const r = store.state.receipts.find((x) => x.id === id); const c = find.customer(find.invoice(r.invoiceId).customerId);
-  const msg = encodeURIComponent(`عزيزي ${c.name}، تم استلام دفعتكم بمبلغ ${m3(r.amount)} د.ب. رقم السند ${r.id}. شكرًا لاختياركم فينيسيا.`);
+  const msg = encodeURIComponent(`عزيزي ${c.name}، تم استلام دفعتكم بمبلغ ${m3(r.amount)} د.ب. رقم السند ${r.id}. شكرًا لاختياركم VENICE.`);
   modal(`سند قبض ${r.id}`, `${receiptDoc(r)}<div class="row end" style="margin-top:14px"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${c.phone.replace(/\D/g, '')}?text=${msg}">${icon('chat', 16)} إرسال عبر واتساب</a><button class="btn primary" data-act="printReceipt" data-id="${r.id}">${icon('printer', 16)} PDF / طباعة</button></div>`, { wide: true });
 }
 
@@ -173,7 +173,7 @@ export const handlers = {
       { desc: 'جزيرة وسطية مع أدراج', qty: 1, price: 900 },
       { desc: 'إكسسوارات ومفصلات هيدروليك', qty: 1, price: 350 },
       { desc: 'توصيل وتركيب', qty: 1, price: 250 }] });
-    nav.render(); toast('تمت تعبئة بيانات تجريبية', 'gold');
+    nav.render(); toast('تمت التعبئة التلقائية', 'gold');
   },
   saveQuote(form, e) {
     const d = formData(form); const mode = e.submitter?.value || 'draft';
@@ -196,7 +196,7 @@ export const handlers = {
   markSent(el) { act.sendQuote(el.dataset.id, el.dataset.ch); closeModal(); toast(`تم تسجيل إرسال العرض عبر ${el.dataset.ch}`); window.open(el.href, '_blank', 'noopener'); nav.render(); },
   async convertQuote(el) {
     const q = find.quote(el.dataset.id);
-    const ok = await confirmBox('تحويل العرض إلى فاتورة', `سيتم إنشاء:<br>• فاتورة بقيمة ${money(quoteTotal(q))} على دفعتين (٥٠٪ + ٥٠٪)<br>• مشروع جديد في مرحلة «اعتماد التصميم»`, 'تأكيد التحويل');
+    const ok = await confirmBox('تحويل العرض إلى فاتورة', `سيتم إنشاء:<br>• فاتورة بقيمة ${money(quoteTotal(q))} على دفعتين (50% + 50%)<br>• مشروع جديد في مرحلة «اعتماد التصميم»`, 'تأكيد التحويل');
     if (!ok) return;
     const { inv, project } = act.convertQuote(q.id);
     toast(`تم إنشاء الفاتورة ${inv.id} والمشروع ${project.id}`);
