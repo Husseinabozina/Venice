@@ -25,7 +25,7 @@ export const STAGES = [
 export const DONE = STAGES.length; // stage index meaning "delivered"
 
 export const ROLES = [
-  { key: 'admin', name: 'المدير العام', person: 'خالد المنصوري', desc: 'جميع الأقسام', nav: '*' },
+  { key: 'admin', name: 'المدير العام', person: 'مصطفى', desc: 'جميع الأقسام', nav: '*' },
   { key: 'sales', name: 'المبيعات', person: 'ريم يوسف', desc: 'العملاء والعروض والفواتير', nav: ['dashboard', 'customers', 'statements', 'sales', 'projects'] },
   { key: 'accountant', name: 'المحاسب', person: 'محمود السيد', desc: 'الحسابات والتحصيل والتقارير', nav: ['dashboard', 'customers', 'statements', 'sales', 'purchases', 'costing', 'reports'] },
   { key: 'production', name: 'مدير الإنتاج', person: 'جاسم علي', desc: 'الورشة ومراحل التصنيع', nav: ['dashboard', 'projects', 'production', 'inventory', 'costing'] },
