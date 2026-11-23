@@ -7,7 +7,7 @@
 const KEY = 'venice-erp-demo-v1';
 
 export const DEMO = {
-  locked: ['statements', 'inventory', 'purchases', 'costing', 'hr', 'reports', 'settings'],
+  locked: [],
   rolePicker: false,
   tour: false,
 };
@@ -84,14 +84,16 @@ function seed() {
   ];
   const suppliers = [
     { id: 'SUP-001', name: 'Star Wood', category: 'ألواح خشب', phone: '+973 1700 1001' },
-    { id: 'SUP-002', name: 'Kastamonu Entegre', category: 'ألواح MDF وHDF', phone: '+90 212 000 0000' },
+    { id: 'SUP-002', name: 'Kastamonu Entegre', category: 'ألواح MDF وHDF', phone: '+973 1771 4400' },
     { id: 'SUP-003', name: 'مورد الألومنيوم المحلي', category: 'ألومنيوم', phone: '+973 1700 2002' },
     { id: 'SUP-004', name: 'مورد الزجاج', category: 'زجاج', phone: '+973 1700 3003' },
   ];
+  const DUR = [3, 2, 4, 2, 3, 2, 1, 2];
+  const at = (i) => DUR.slice(0, i).reduce((a, b) => a + b, 0);
   const stagesFor = (current, startOffset) => STAGES.map((s, i) => ({
     key: s.key,
-    start: i <= current ? D(startOffset + i * 2) : null,
-    end: i < current ? D(startOffset + i * 2 + 2) : null,
+    start: i <= current ? D(startOffset + at(i)) : null,
+    end: i < current ? D(startOffset + at(i + 1)) : null,
   }));
   const projects = [
     { id: 'VEN-2026-0001', name: 'مطبخ فيلا حديث', customerId: 'CUS-001', type: 'مطبخ', value: 4500, stage: 2, stages: stagesFor(2, -10), location: 'المنامة، البحرين', dimensions: 'حسب المخططات المعتمدة (4.2م × 3.1م)', materials: 'MDF / HPL / إكسسوارات', notes: 'اعتماد اللون قبل بدء التصنيع', files: [{ name: 'kitchen-plan.pdf', size: '2.4 MB' }, { name: 'kitchen-3d.skp', size: '18.1 MB' }], expected: D(14), assignee: 'جاسم علي', laborHours: 46, machineHours: 12, otherCosts: 180 },
@@ -142,7 +144,7 @@ function seed() {
     { id: 'EMP-003', name: 'سانجاي ناير', dept: 'الورشة', job: 'مشغّل CNC', salary: 380, today: 'present' },
     { id: 'EMP-004', name: 'محمد رفيق', dept: 'الورشة', job: 'فني ألومنيوم', salary: 300, today: 'absent' },
     { id: 'EMP-005', name: 'أنيل شارما', dept: 'الورشة', job: 'دهان', salary: 300, today: 'present' },
-    { id: 'EMP-006', name: 'فريق التركيب 1', dept: 'التركيب', job: 'فني تركيب', salary: 340, today: 'present' },
+    { id: 'EMP-006', name: 'عبدالله سالم', dept: 'التركيب', job: 'فني تركيب', salary: 340, today: 'present' },
     { id: 'EMP-007', name: 'سامي حداد', dept: 'المخازن', job: 'أمين مخزن', salary: 420, today: 'present' },
     { id: 'EMP-008', name: 'ريم يوسف', dept: 'المبيعات', job: 'مسؤولة مبيعات', salary: 550, today: 'leave' },
     { id: 'EMP-009', name: 'محمود السيد', dept: 'الحسابات', job: 'محاسب', salary: 600, today: 'present' },
@@ -155,7 +157,7 @@ function seed() {
     { ts: D(-6) + ' 11:30', user: 'جاسم علي', text: 'نقل مطبخ فيلا سترة إلى مرحلة القص CNC', ref: 'projects/VEN-2026-0004' },
   ];
   return {
-    company: { name: 'VENICE FURNITURE WORKSHOP W.L.L', nameAr: 'فينيسيا للأثاث والورش', country: 'مملكة البحرين', currency: 'د.ب', users: '10–20' },
+    company: { name: 'VENICE FURNITURE WORKSHOP W.L.L', nameAr: 'مطابخ · أثاث · ديكورات', country: 'مملكة البحرين', currency: 'د.ب', users: '10–20' },
     rates: { labor: 3, machine: 8 },
     terms: TERMS.slice(),
     customers, materials, suppliers, projects, quotes, invoices, receipts, movements, pos, employees, activity,

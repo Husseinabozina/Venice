@@ -29,7 +29,7 @@ function projectLog(p, inv) {
   const pm = ROLES.find((r) => r.key === 'production')?.person || '—';
   p.stages.forEach((st, i) => { if (st?.start && i < DONE && !has(STAGES[i].name)) out.push({ text: `بدء مرحلة ${STAGES[i].name}`, user: i === DONE - 1 ? (p.assignee || pm) : pm, ts: st.start }); });
   if (inv && !has(inv.id)) out.push({ text: `إصدار الفاتورة ${inv.id}`, user: 'ريم يوسف', ts: inv.date });
-  if (inv) store.state.receipts.filter((r) => r.invoiceId === inv.id && !has(r.id)).forEach((r) => out.push({ text: `استلام دفعة ${money(r.amount)} · سند ${r.id}`, user: 'ريم يوسف', ts: r.date }));
+  if (inv) store.state.receipts.filter((r) => r.invoiceId === inv.id && !has(r.id)).forEach((r) => out.push({ text: `استلام دفعة ${Number(r.amount).toLocaleString('en-US', { minimumFractionDigits: 3 })} د.ب · سند ${r.id}`, user: 'ريم يوسف', ts: r.date }));
   return out.sort((a, b) => String(b.ts).localeCompare(String(a.ts)));
 }
 function detail(p) {

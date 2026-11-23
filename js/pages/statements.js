@@ -34,21 +34,21 @@ function statementDoc(d) {
 export default {
   render(id) {
     const s = store.state; const cid = id || s.customers[0].id; const d = compute(cid);
-    return `<div class="page-head"><div><h1>كشف حساب العملاء</h1><p>كل الفواتير والدفعات لعميل في فترة، والرصيد بعد كل حركة.</p></div>
-      <button class="btn primary" data-act="printStatement" data-id="${cid}">${icon('printer', 16)} PDF / طباعة</button></div>
+    return `<div class="page-head"><div><h1>كشف حساب العملاء</h1></div>
+      <button class="btn primary" data-act="printStatement" data-id="${cid}">${icon('printer', 16)} طباعة / PDF</button></div>
     <div class="card card-pad" style="margin-bottom:18px"><div class="grid3" style="grid-template-columns:2fr 1fr 1fr">
       <label class="f">العميل<select data-change="stCustomer">${s.customers.map((c) => `<option value="${c.id}" ${c.id === cid ? 'selected' : ''}>${esc(c.name)}${c.parentId ? ` (تابع لـ ${esc(find.customer(c.parentId).name)})` : ''}</option>`).join('')}</select></label>
       <label class="f">من تاريخ<input type="date" value="${opts.from}" data-change="stFrom"></label>
       <label class="f">إلى تاريخ<input type="date" value="${opts.to}" data-change="stTo"></label></div>
-      <div class="row" style="margin-top:12px"><button class="btn sm" data-act="stMonth">الشهر الحالي</button><button class="btn sm" data-act="stAll">من الأول</button>
-      ${d.kids.length ? `<label class="row small" style="gap:6px;margin-inline-start:auto;cursor:pointer"><input type="checkbox" style="width:16px;height:16px" ${opts.withKids ? 'checked' : ''} data-change="stKids"> كشف مجمّع يشمل العملاء التابعين (${d.kids.length})</label>` : ''}</div></div>
+      <div class="row" style="margin-top:12px"><button class="btn sm" data-act="stMonth">الشهر الحالي</button><button class="btn sm" data-act="stAll">كل الفترات</button>
+      ${d.kids.length ? `<label class="row small" style="gap:6px;margin-inline-start:auto;cursor:pointer"><input type="checkbox" style="width:16px;height:16px" ${opts.withKids ? 'checked' : ''} data-change="stKids"> يشمل العملاء التابعين (${d.kids.length})</label>` : ''}</div></div>
     <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
       <div class="kcard"><div class="l">الرصيد الافتتاحي</div><div class="v num" style="font-size:20px">${money(d.opening)}</div></div>
       <div class="kcard"><div class="l">فواتير الفترة (مدين)</div><div class="v num" style="font-size:20px">${money(d.td)}</div></div>
       <div class="kcard"><div class="l">دفعات الفترة (دائن)</div><div class="v num" style="font-size:20px;color:var(--ok)">${money(d.tc)}</div></div>
       <div class="kcard"><div class="l">الرصيد الختامي</div><div class="v num gold" style="font-size:20px">${money(d.closing)}</div></div></div>
     <div class="card"><div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>المرجع</th><th>البيان</th><th class="num">مدين</th><th class="num">دائن</th><th class="num">الرصيد</th></tr></thead>
-      <tbody>${d.rows.length ? d.rows.map((r) => `<tr class="click" data-href="sales/${r.ref.startsWith('REC') ? store.state.receipts.find((x) => x.id === r.ref).invoiceId : r.ref}"><td>${fmtDate(r.date)}</td><td><b>${r.ref}</b></td><td>${esc(r.desc)}</td><td class="num">${r.debit ? money(r.debit, false) : '—'}</td><td class="num" style="color:var(--ok)">${r.credit ? money(r.credit, false) : '—'}</td><td class="num"><b>${money(r.bal, false)}</b></td></tr>`).join('') : '<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">مافيش حركات في الفترة دي</td></tr>'}</tbody>
+      <tbody>${d.rows.length ? d.rows.map((r) => `<tr class="click" data-href="sales/${r.ref.startsWith('REC') ? store.state.receipts.find((x) => x.id === r.ref).invoiceId : r.ref}"><td>${fmtDate(r.date)}</td><td><b>${r.ref}</b></td><td>${esc(r.desc)}</td><td class="num">${r.debit ? money(r.debit, false) : '—'}</td><td class="num" style="color:var(--ok)">${r.credit ? money(r.credit, false) : '—'}</td><td class="num"><b>${money(r.bal, false)}</b></td></tr>`).join('') : '<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">لا توجد حركات في هذه الفترة</td></tr>'}</tbody>
       <tfoot><tr><td colspan="3">إجمالي الفترة</td><td class="num">${money(d.td, false)}</td><td class="num">${money(d.tc, false)}</td><td class="num">${money(d.closing, false)}</td></tr></tfoot></table></div></div>`;
   },
 };
